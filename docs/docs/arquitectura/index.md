@@ -12,6 +12,7 @@ Explora los detalles técnicos de Cicero a través de las siguientes secciones:
 
 - **[Diagrama de Contenedores (C4)](./contenedores)**: Visualiza la estructura del sistema y el flujo de datos entre los clientes, la API de **Nest.js** y la infraestructura.
 - **[Diagrama de Componentes (Hexagonal)](./componentes)**: Detalla la estructura interna de la API, identificando los adaptadores **Drivers** y **Driven**.
+- **[Diagrama de Secuencia](./secuencia)**: Ilustra el flujo paso a paso del caso de uso de análisis de audio en el backend.
 - **[Casos de Uso (Gherkin)](./casos-de-uso)**: Especificación detallada de los criterios de aceptación del MVP utilizando BDD.
 - **[Decisiones de Diseño](./decisiones)**: Justificación técnica del uso de Nest.js, Vertical Slicing, Arquitectura Hexagonal y otras herramientas.
 
