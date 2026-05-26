@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'SpeechMaster',
+  title: 'Cicero',
   tagline: 'Domina tu oratoria',
   favicon: 'img/favicon.ico',
 
@@ -69,9 +69,9 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'SpeechMaster',
+      title: 'Cicero',
       logo: {
-        alt: 'SpeechMaster Logo',
+        alt: 'Cicero Logo',
         src: 'img/logo.svg',
       },
       items: [
@@ -127,7 +127,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} SpeechMaster. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Cicero. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

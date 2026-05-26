@@ -1,4 +1,4 @@
-# Project Instructions: Cicero (SpeechMaster)
+# Project Instructions: Cicero
 
 ## Stack & Tooling
 - **Package Manager:** Always use `pnpm`.

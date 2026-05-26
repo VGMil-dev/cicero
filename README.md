@@ -1,4 +1,4 @@
-﻿# Cicero - SpeechMaster
+﻿# Cicero
 
 Aplicación multiplataforma para el análisis de oratoria y detección de muletillas.
 
