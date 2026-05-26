@@ -11,6 +11,7 @@ El sistema utiliza una arquitectura de servicios centralizada donde la lógica d
 Explora los detalles técnicos de Cicero a través de las siguientes secciones:
 
 - **[Diagrama de Contenedores (C4)](./contenedores)**: Visualiza la estructura del sistema y el flujo de datos entre los clientes, la API de **Nest.js** y la infraestructura.
+- **[Diagrama de Componentes (Hexagonal)](./componentes)**: Detalla la estructura interna de la API, identificando los adaptadores **Drivers** y **Driven**.
 - **[Decisiones de Diseño](./decisiones)**: Justificación técnica del uso de Nest.js, Vertical Slicing, Arquitectura Hexagonal y otras herramientas.
 
 ## 🔄 Flujo de Valor del MVP

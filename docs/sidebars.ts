@@ -21,6 +21,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'arquitectura/index',
         'arquitectura/contenedores',
+        'arquitectura/componentes',
         'arquitectura/decisiones',
       ],
     },
