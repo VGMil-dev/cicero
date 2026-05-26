@@ -22,6 +22,7 @@ const sidebars: SidebarsConfig = {
         'arquitectura/index',
         'arquitectura/contenedores',
         'arquitectura/componentes',
+        'arquitectura/casos-de-uso',
         'arquitectura/decisiones',
       ],
     },
