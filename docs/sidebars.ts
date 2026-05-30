@@ -27,6 +27,13 @@ const sidebars: SidebarsConfig = {
         'arquitectura/decisiones',
       ],
     },
+    {
+      type: 'category',
+      label: 'Diseño',
+      items: [
+        'diseno/sistema-de-diseno',
+      ],
+    },
   ],
 };
 
