@@ -6,7 +6,16 @@
   <card>
     <base>border-3 border-black bg-surface rounded-xl p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]</base>
     <background>bg-[radial-gradient(#000_1px,transparent_0)] bg-[size:20px_20px]</background>
+    <empty-state>border-2 border-dashed border-black bg-transparent shadow-none</empty-state>
   </card>
+  <sidebar-nav>
+    <container>w-64 border-r-3 border-black h-screen sticky top-0 bg-surface</container>
+    <item-active>bg-primary border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mx-4 rounded-lg</item-active>
+  </sidebar-nav>
+  <dark-card>
+    <base>bg-inverse-surface text-white border-3 border-black rounded-xl p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]</base>
+    <accent-text>text-primary</accent-text>
+  </dark-card>
   <segmented-progress>
     <container>flex gap-1 h-4 w-full</container>
     <segment>h-full border-2 border-black rounded-full bg-pastel-pink transition-all</segment>
