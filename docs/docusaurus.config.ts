@@ -51,7 +51,15 @@ const config: Config = {
           editUrl:
             'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
-        blog: false,
+        blog: {
+          showReadingTime: true,
+          path: 'bitacora',
+          routeBasePath: 'bitacora',
+          blogTitle: 'Bitácora de Decisiones',
+          blogDescription: 'Historial de la evolución arquitectónica y técnica de Cicero',
+          blogSidebarTitle: 'Todas las decisiones',
+          blogSidebarCount: 'ALL',
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -80,6 +88,11 @@ const config: Config = {
           sidebarId: 'mainSidebar',
           position: 'left',
           label: 'Arquitectura',
+        },
+        {
+          to: '/bitacora',
+          label: 'Bitácora',
+          position: 'left',
         },
         {
           href: 'https://github.com/facebook/docusaurus',
