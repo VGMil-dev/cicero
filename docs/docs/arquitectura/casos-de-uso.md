@@ -1,6 +1,10 @@
 # Casos de Uso y Criterios de Aceptación (Gherkin)
 
-En esta sección se detallan los comportamientos esperados del sistema (MVP de Cicero) utilizando formato BDD (Behavior-Driven Development). Estos escenarios reflejan nuestra arquitectura basada en **Transformers.js** para procesamiento verbatim local.
+:::note Especificacion objetivo del MVP
+Estos escenarios funcionan como referencia de comportamiento deseado para el MVP. Deben leerse como especificacion de la arquitectura objetivo y no necesariamente como confirmacion de que cada pieza ya existe exactamente asi en el repositorio.
+:::
+
+En esta seccion se detallan los comportamientos esperados del sistema (MVP de Cicero) utilizando formato BDD (Behavior-Driven Development). Estos escenarios reflejan la arquitectura objetivo basada en **Transformers.js** para procesamiento verbatim local.
 
 ---
 

@@ -4,6 +4,10 @@ Bienvenido a la documentacion de arquitectura de **Cicero**.
 
 Esta seccion describe la arquitectura objetivo del proyecto y, cuando aplica, senala las decisiones que todavia estan en transicion dentro del repositorio.
 
+:::note Como leer esta seccion
+Las paginas de arquitectura describen principalmente la **vision objetivo** del producto. Usalas junto con la [introduccion](../intro) y la [bitacora](/bitacora) para distinguir con claridad entre direccion tecnica, estado actual y decisiones en consolidacion.
+:::
+
 ## 🏛️ Visión General del Proyecto
 Cicero está diseñado como una plataforma multiplataforma moderna. Nuestra arquitectura prioriza la **precisión en la transcripción (verbatim)**, el **cero costo de inferencia**, y un ecosistema de desarrollo fuertemente tipado.
 

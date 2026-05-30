@@ -1,7 +1,7 @@
 ---
 slug: transformers-js-verbatim
 title: "Migración de Vosk a Transformers.js"
-authors: [lead_architect]
+authors: [vgmil_dev]
 tags: [arquitectura, ia, transformersjs, typescript, webgpu]
 ---
 

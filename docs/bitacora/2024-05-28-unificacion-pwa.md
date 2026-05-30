@@ -1,7 +1,7 @@
 ---
 slug: unificacion-pwa
 title: "De Monorepo a PWA: Unificación del Frontend"
-authors: [lead_architect]
+authors: [vgmil_dev]
 tags: [arquitectura, nextjs, pwa, frontend]
 ---
 

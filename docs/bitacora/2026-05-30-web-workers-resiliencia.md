@@ -1,7 +1,7 @@
 ﻿---
 slug: web-workers-resiliencia-ia
 title: "Aislamiento en Web Workers y Estrategia Zero Trust para IA"
-authors: [lead_architect]
+authors: [vgmil_dev]
 tags: [arquitectura, performance, web-workers, resiliencia, pwa]
 ---
 

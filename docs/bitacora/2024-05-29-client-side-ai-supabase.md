@@ -1,7 +1,7 @@
 ---
 slug: client-side-ai-supabase
 title: "Client-Side AI y Supabase: Eliminación del Backend Centralizado"
-authors: [lead_architect]
+authors: [vgmil_dev]
 tags: [arquitectura, serverless, supabase, ia, backend]
 ---
 
