@@ -31,4 +31,7 @@ description: Especialista en diseño UI/UX Neo-Brutalista para Cicero. Activa es
   - Consulta 'references/tokens.xml' para valores exactos de HEX y tipografía.
   - Consulta 'references/components.xml' para patrones de implementación en Tailwind.
   - Consulta 'references/visual-analysis.md' para el desglose de la interfaz móvil oficial.
+  - **Assets de Marca**:
+    - `assets/logo.svg`: Uso prioritario para interfaces digitales (nitidez máxima).
+    - `assets/logo_transparent.png`: Uso en fondos oscuros o con texturas complejas.
 </reference_map>

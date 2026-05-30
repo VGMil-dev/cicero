@@ -76,7 +76,7 @@ const config: Config = {
       title: 'Cicero',
       logo: {
         alt: 'Cicero Logo',
-        src: 'img/cicero_logo.png',
+        src: 'img/logo.svg',
       },
       items: [
         {
