@@ -1,67 +1,56 @@
 # Diagrama de Componentes (Hexagonal)
 
-Este diagrama detalla la estructura interna del **Core Backend (Nest.js)** siguiendo los principios de la **Arquitectura Hexagonal (Ports & Adapters)**. Aquí se visualiza la separación entre los disparadores (Drivers), la lógica de negocio (Core) y las dependencias externas (Driven).
+Este diagrama detalla la estructura interna de nuestra aplicación Next.js aplicando **Arquitectura Limpia (Ports & Adapters)**, asegurando que la IA y la Base de Datos sean meros plugins de nuestro núcleo de negocio.
 
 ```mermaid
 %%{init: {'flowchart': {'curve': 'step'}}}%%
 flowchart LR
-    subgraph Drivers [Adaptadores Primarios - Drivers]
-        RestCtrl[REST Controllers<br/>Nest.js]
+    subgraph Presentation [Capa de Presentación - Drivers]
+        UIComponents[UI Components<br/>React Hooks / Zustand]
     end
 
-    subgraph Core [Núcleo - Hexágono]
+    subgraph Core [Núcleo de Negocio]
         direction TB
         subgraph Ports_In [Puertos de Entrada]
-            AudioPort_In[IAnalyzeAudioUseCase]
+            RecordPort_In[IAnalyzeDisfluenciesUseCase]
         end
         subgraph Domain [Dominio]
-            UseCase[AnalyzeAudioUseCase]
-            Entities[Entities & Domain Services]
+            UseCase[CalculateScoreUseCase]
+            Entities[Session & Score Entities]
         end
         subgraph Ports_Out [Puertos de Salida]
-            IA_Port[ISpeechToText]
-            Repo_Port[IScoreRepository]
-            Store_Port[IAudioStorage]
+            Audio_Port[IAudioAnalyzer]
+            Repo_Port[ISessionRepository]
         end
     end
 
-    subgraph Driven [Adaptadores Secundarios - Driven]
-        MockIA[Mock IA Adapter<br/>TypeScript]
-        SupabaseDB[Supabase DB Adapter<br/>PostgreSQL]
-        SupabaseStorage[Supabase Storage Adapter]
+    subgraph Infrastructure [Adaptadores de Infraestructura - Driven]
+        TransformersAdapter[Transformers.js Adapter<br/>Web Worker]
+        SupabaseAdapter[Supabase Server Action Adapter]
     end
 
-    %% Relaciones Drivers -> Core
-    RestCtrl -->|Inyecta| AudioPort_In
-    AudioPort_In -->|Implementado por| UseCase
-    UseCase -->|Usa| Entities
+    %% Relaciones UI -> Core
+    UIComponents -->|Invoca| RecordPort_In
+    RecordPort_In -->|Implementado por| UseCase
+    UseCase -->|Maneja| Entities
 
-    %% Relaciones Core -> Driven
-    UseCase -->|Llama| IA_Port
+    %% Relaciones Core -> Infraestructura
+    UseCase -->|Llama| Audio_Port
     UseCase -->|Llama| Repo_Port
-    UseCase -->|Llama| Store_Port
 
-    IA_Port -->|Implementado por| MockIA
-    Repo_Port -->|Implementado por| SupabaseDB
-    Store_Port -->|Implementado por| SupabaseStorage
+    Audio_Port -->|Implementado por| TransformersAdapter
+    Repo_Port -->|Implementado por| SupabaseAdapter
 ```
 
 ## Descripción de Componentes
 
-### 1. Adaptadores Primarios (Drivers)
-Son los puntos de entrada a la aplicación. En nuestro caso, los **REST Controllers** de Nest.js se encargan de recibir las peticiones HTTP, validar los DTOs básicos y delegar la ejecución a los puertos de entrada.
+### 1. Capa de Presentación (Drivers)
+Son los componentes de Next.js, Hooks personalizados y el store de Zustand. Se encargan de iniciar la grabación y, posteriormente, renderizar la transcripción completa, iterando sobre los timestamps para marcar en rojo las muletillas detectadas por el Caso de Uso.
 
-### 2. Núcleo (Core / Hexágono)
-Es donde reside el valor real del negocio.
-- **Puertos de Entrada (Input Ports)**: Interfaces que definen los casos de uso disponibles para los Drivers.
-- **Dominio**: Contiene la lógica pura (Domain Services) y las entidades. El `AnalyzeAudioUseCase` orquestará la grabación, el análisis y la persistencia.
-- **Puertos de Salida (Output Ports)**: Interfaces que definen los contratos que el dominio necesita de los servicios externos.
+### 2. Núcleo (Dominio y Casos de Uso)
+- **Dominio**: Contiene la lógica pura. Recibe la transcripción completa (texto y timestamps de palabras) y contiene el algoritmo que decide qué palabras se consideran disfluencias para calcular el score final.
+- **Puertos de Salida**: `IAudioAnalyzer` define el contrato que requiere el dominio: *"Dame una función que reciba un blob de audio y me devuelva una transcripción completa con timestamps por palabra"*.
 
-### 3. Adaptadores Secundarios (Driven)
-Son las implementaciones técnicas de los puertos de salida:
-- **Mock IA Adapter**: Simula el procesamiento de lenguaje natural y conteo de muletillas.
-- **Supabase DB Adapter**: Implementación concreta de la persistencia de scores en PostgreSQL.
-- **Supabase Storage Adapter**: Maneja la subida y referencia de archivos de audio si fuera necesario en el futuro (actualmente local temporal).
-
-## Inversión de Dependencia
-Observa que las flechas siempre apuntan hacia el **Core** o son llamadas desde él a través de **Interfaces (Ports)**. Esto asegura que el dominio no dependa de si usamos Supabase, Nest.js o cualquier otra tecnología externa, cumpliendo con los estándares de **Clean Architecture**.
+### 3. Adaptadores de Infraestructura (Driven)
+- **Transformers.js Adapter**: Implementación técnica vital. Encapsula la complejidad de instanciar un Web Worker, cargar el modelo `CrisperWhisper-ONNX` del Hugging Face Hub (o caché local), procesar el audio y formatear la salida para cumplir con la interfaz `IAudioAnalyzer`.
+- **Supabase Adapter**: Ejecutado dentro de una Server Action por seguridad, realiza el `INSERT` de los resultados finales en PostgreSQL.

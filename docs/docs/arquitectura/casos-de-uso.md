@@ -1,70 +1,66 @@
 # Casos de Uso y Criterios de Aceptación (Gherkin)
 
-En esta sección se detallan los comportamientos esperados del sistema (MVP de Cicero) utilizando el formato BDD (Behavior-Driven Development) con sintaxis **Gherkin**. Esto servirá como base para nuestras pruebas unitarias e integración en el frontend y backend.
+En esta sección se detallan los comportamientos esperados del sistema (MVP de Cicero) utilizando formato BDD (Behavior-Driven Development). Estos escenarios reflejan nuestra arquitectura basada en **Transformers.js** para procesamiento verbatim local.
 
 ---
 
-## 🎙️ Feature 1: Grabación de Discurso
+## 🎙️ Feature 1: Carga de Modelo de IA y Grabación
 **Como** usuario que desea mejorar su oratoria,
-**Quiero** poder grabar mi voz de forma fluida a través de la aplicación (PWA),
-**Para** someter mi discurso a un análisis de limpieza.
+**Quiero** que la aplicación grabe mi voz y la procese localmente de forma privada,
+**Para** no depender de APIs de terceros ni pagar costos por el análisis de mi discurso.
 
-### Scenario: El usuario concede permisos e inicia la grabación
-> **Given** que el usuario abre la pantalla de grabación por primera vez
-> **When** presiona el botón de "Iniciar Grabación"
-> **Then** el navegador solicita permisos de acceso al micrófono del dispositivo
-> **And** si el permiso es concedido, la grabación comienza inmediatamente
-> **And** se muestra un indicador visual de grabación en progreso (con temporizador)
+### Scenario: Inicialización del Web Worker y caché del modelo
+> **Given** que el usuario abre la aplicación PWA
+> **When** el componente de grabación se monta
+> **Then** la app instancia un Web Worker en segundo plano
+> **And** `Transformers.js` descarga el modelo `CrisperWhisper-ONNX` (si no existe) y lo guarda en IndexedDB
+> **And** el indicador de "Modelo Listo" se activa para permitir la grabación
 
-### Scenario: El usuario deniega los permisos de micrófono
-> **Given** que el usuario presiona "Iniciar Grabación"
-> **When** el sistema solicita permisos de acceso al micrófono
-> **And** el usuario deniega el permiso
-> **Then** el sistema muestra un mensaje de error explicativo
-> **And** la grabación no se inicia
-> **And** se ofrece un atajo para ir a la configuración del dispositivo
-
-### Scenario: Finalización y envío de la grabación
-> **Given** que una grabación está en progreso
-> **When** el usuario presiona el botón de "Detener Grabación"
-> **Then** el sistema detiene la captura de audio
-> **And** el archivo de audio se guarda temporalmente en local
-> **And** el sistema inicia automáticamente el proceso de envío a la API (Nest.js)
-> **And** la interfaz muestra un estado de "Carga/Análisis en curso"
+### Scenario: El usuario graba su discurso
+> **Given** que el modelo de IA está listo en el cliente
+> **When** el usuario presiona "Iniciar Grabación"
+> **Then** el navegador solicita permisos de acceso al micrófono
+> **And** comienza la captura del `MediaRecorder`
+> **And** se muestra un indicador visual de grabación en progreso
 
 ---
 
-## 🤖 Feature 2: Análisis de Voz (Core Backend)
-**Como** sistema central (API Nest.js),
-**Quiero** procesar el audio recibido y ejecutar el algoritmo de detección,
-**Para** transcribir el texto y contabilizar las muletillas.
+## 🤖 Feature 2: Transcripción Verbatim y Detección Algorítmica
+**Como** sistema de evaluación (Capa de Dominio),
+**Quiero** recibir una transcripción absoluta (incluyendo tartamudeos) producida por la IA,
+**Para** poder identificar computacionalmente dónde ocurrieron las fallas de oratoria.
 
-### Scenario: Análisis exitoso de un audio válido
-> **Given** que el backend recibe un archivo de audio temporal y válido
-> **When** el `AnalyzeAudioUseCase` procesa la solicitud
-> **Then** el sistema invoca al `Mock IA Adapter` para simular la transcripción a texto
-> **And** contabiliza las ocurrencias basándose en un diccionario de muletillas (ej. "ehh", "este", "bueno", "digamos")
-> **And** genera una entidad "Score" con: duración, total de palabras, total de muletillas y porcentaje de limpieza
-> **And** responde al cliente con los resultados detallados
+### Scenario: Procesamiento del audio y extracción de texto completo
+> **Given** que el usuario finaliza la grabación (detiene el `MediaRecorder`)
+> **When** la UI envía el Blob de audio al Web Worker
+> **Then** el modelo ONNX realiza la inferencia utilizando WebGPU o WASM
+> **And** devuelve un objeto JSON que contiene el `texto completo` y un arreglo de `chunks` (palabras individuales con sus timestamps de inicio y fin)
+
+### Scenario: Cálculo del Score en el Caso de Uso
+> **Given** que la UI recibe el JSON de transcripción del Worker
+> **When** el adaptador invoca al `CalculateScoreUseCase`
+> **Then** la lógica de negocio itera sobre el arreglo de `chunks`
+> **And** compara cada palabra contra un diccionario de disfluencias ("eh", "mmm", "bueno", "este")
+> **And** cuenta las coincidencias y calcula el Porcentaje de Limpieza (Score)
+> **And** genera una entidad de Dominio `ScoreResult`
 
 ---
 
-## 📊 Feature 3: Visualización de Resultados y Persistencia
-**Como** usuario final o administrador,
-**Quiero** ver los resultados del análisis y auditar el historial,
-**Para** evaluar el desempeño del discurso a lo largo del tiempo.
+## 📊 Feature 3: Visualización de Resultados y Persistencia BaaS
+**Como** usuario,
+**Quiero** leer exactamente lo que dije, ver mis muletillas resaltadas y guardar el historial,
+**Para** auditar mi progreso a largo plazo.
 
-### Scenario: Visualización inmediata del Score en la App
-> **Given** que el análisis del audio ha finalizado exitosamente
-> **When** la API devuelve el objeto "Score" y el texto transcrito al cliente
-> **Then** la aplicación (PWA) muestra la pantalla de resumen
-> **And** se visualiza la duración y el porcentaje de "limpieza" del discurso
-> **And** el texto transcrito se renderiza resaltando visualmente las muletillas detectadas
+### Scenario: Renderizado del texto con muletillas resaltadas
+> **Given** que el Caso de Uso generó la entidad `ScoreResult`
+> **When** la UI renderiza la pantalla de resultados
+> **Then** se muestra el texto completo de la transcripción
+> **And** la aplicación utiliza los timestamps identificados en el paso anterior para envolver las palabras defectuosas en estilos visuales de advertencia (color rojo)
+> **And** se grafican los contadores totales de limpieza
 
-### Scenario: Persistencia del registro para auditoría
-> **Given** que se ha generado un nuevo "Score" y transcripción
-> **When** el caso de uso de análisis en el backend concluye
-> **Then** la API invoca al `Supabase DB Adapter`
-> **And** se guarda de forma segura el registro (Score, texto, fecha y usuario/sesión) en la base de datos PostgreSQL
-> **And** el backend descarta el archivo de audio temporal (para ahorrar almacenamiento en el MVP)
-> **And** los datos quedan disponibles de inmediato para su consulta histórica en la PWA
+### Scenario: Persistencia eficiente mediante Server Actions
+> **Given** que la aplicación tiene los resultados finales calculados en el cliente
+> **When** el sistema procede a guardar el registro
+> **Then** la PWA ejecuta una `Server Action` de Next.js de forma transparente
+> **And** la acción inserta los metadatos (texto, puntaje, fecha) en Supabase PostgreSQL de manera segura
+> **And** los datos quedan disponibles para el dashboard histórico del usuario

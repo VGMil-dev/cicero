@@ -1,32 +1,24 @@
 # Decisiones de Diseño
 
-En esta sección se detallan las decisiones arquitectónicas clave tomadas para el proyecto **Cicero**, justificando el uso de patrones modernos para garantizar la escalabilidad y mantenibilidad.
+En esta sección se detallan las decisiones arquitectónicas clave tomadas para el proyecto **Cicero**, justificando el pivote estratégico para garantizar escalabilidad, costo cero en inferencia y alta precisión en la detección de disfluencias.
 
-## 📐 Patrones Arquitectónicos
+## 🤖 Transformers.js sobre Vosk (El Motor de IA)
+Inicialmente se evaluó `vosk-browser` por su bajísima latencia. Sin embargo, se decidió pivotar hacia **Transformers.js (Hugging Face)** por tres razones arquitectónicas críticas:
+1.  **Soporte TypeScript y Ecosistema Moderno:** Transformers.js es nativo de la web moderna, permitiendo un código limpio, fuertemente tipado y fácil de integrar en Web Workers dentro de Next.js, a diferencia de la API más arcaica de Kaldi/Vosk.
+2.  **Transcripción Verbatim (El problema de Whisper):** Los modelos tradicionales de Speech-to-Text limpian el audio (borran los "eh" y "mmm"). Al usar Transformers.js, podemos cargar **CrisperWhisper**, un modelo ONNX especializado específicamente en transcripción literal que *retiene* las muletillas y provee timestamps precisos por palabra, lo cual es el core de nuestra aplicación.
+3.  **Aceleración de Hardware:** Transformers.js (v3) soporta **WebGPU**, lo que permite delegar la inferencia a la tarjeta gráfica del usuario en lugar de bloquear la CPU, logrando velocidades de procesamiento muy superiores.
 
-### Vertical Slicing (Rebanado Vertical)
-A diferencia de la arquitectura de capas tradicional, en Cicero optamos por **Vertical Slicing**. Cada funcionalidad (ej. `recording`) es un "slice" independiente que contiene sus propios modelos, lógica y controladores, lo que reduce el acoplamiento y facilita el crecimiento del sistema.
+## 📱 Estrategia PWA sobre App Nativa (React Native/Flutter)
+El requerimiento original sugería un framework híbrido móvil tradicional. Pivotamos hacia una **Progressive Web App (PWA)** en Next.js.
+- **Justificación**: Las apps híbridas enfrentan enormes dificultades para compilar modelos acústicos complejos (C++) en iOS/Android. La PWA nos permite descargar el modelo ONNX en la caché del navegador de forma transparente, logrando procesamiento $0 en servidor y sin depender de APIs de terceros (No Vendor Lock-in de OpenAI).
 
-### Arquitectura Hexagonal (Ports & Adapters)
-Aplicamos los principios de arquitectura hexagonal para aislar el núcleo de negocio de las tecnologías externas. Esto es especialmente visible en el backend con **Nest.js**, donde el dominio permanece puro y los adaptadores manejan la comunicación con Supabase o servicios de IA.
+## 🚀 Eliminación del Backend Tradicional (Serverless / BaaS)
+Se descartó el diseño inicial de usar una API centralizada (Nest.js).
+- **Cero Cuellos de Botella**: Procesar audio en un backend central genera altos costos de CPU. Al delegar la inferencia al dispositivo del usuario (Client-Side AI), el backend es redundante.
+- **Supabase directo**: Usamos Supabase interactuando de forma segura a través de **Server Actions** nativas de Next.js.
 
-## 📱 Estrategia de Cliente Único (PWA)
-Hemos decidido pivotar hacia una **Progressive Web App (PWA)** utilizando **Next.js** en lugar de mantener aplicaciones separadas para web y móvil (Expo).
-- **Eficiencia**: Un solo codebase para todas las plataformas reduce los costos de desarrollo y mantenimiento.
-- **Accesibilidad**: Los usuarios pueden acceder e "instalar" la app directamente desde el navegador sin pasar por las tiendas de aplicaciones (App Store/Play Store) en la fase de MVP.
-- **Capacidades**: Las PWAs modernas permiten el acceso al micrófono y almacenamiento local necesario para Cicero.
-
-## 🚀 Nest.js como Core Backend
-Hemos decidido implementar una API dedicada con **Nest.js** en lugar de conectar el cliente directamente a Supabase:
-- **Centralización**: La lógica de cálculo de "scores" y análisis de muletillas reside en un solo lugar, asegurando consistencia.
-- **Seguridad**: Permite manejar credenciales sensibles y lógica compleja del lado del servidor.
-- **Abstracción**: El cliente PWA actúa como un *Thin Client*, encargándose solo de la interacción con el usuario.
-
-## 🧠 Gestión de Estado con Zustand
-Elegimos **Zustand** por su simplicidad y bajo boilerplate. Es ideal para manejar el estado de la grabación y los resultados de forma reactiva en la PWA.
-
-## 🧪 Estrategia de Testing (Jest)
-La arquitectura está diseñada para ser **test-friendly**:
-- **Domain Services**: Pruebas unitarias puras.
-- **Use Cases**: Pruebas con inyección de mocks para los puertos (Ports).
-- **Adapters**: Tests de integración para verificar la persistencia y la comunicación con servicios externos.
+## 📐 Patrones Arquitectónicos (Clean Architecture)
+Para evitar quedar atados a Supabase y cumplir con los estándares de mantenibilidad, aplicamos **Clean Architecture (Ports & Adapters)**:
+- **Separación**: Los componentes UI solo renderizan el texto y los timestamps generados por la IA.
+- **Puertos**: El dominio se comunica a través de interfaces (`ISpeechEngine`, `ISessionRepository`).
+- **Adaptadores**: Implementamos adaptadores como el `TransformersSpeechAdapter` que orquesta la comunicación con el Web Worker.
