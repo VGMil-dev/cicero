@@ -1,41 +1,38 @@
-# Website
+# Docs de Cicero
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+Este sitio esta construido con Docusaurus y concentra la documentacion tecnica del proyecto: vision objetivo, decisiones de arquitectura y estado actual en transicion.
 
-## Installation
+## Requisitos
+
+- Node.js 20 o superior
+- pnpm
+
+## Instalacion
 
 ```bash
-yarn
+pnpm install
 ```
 
-## Local Development
+## Desarrollo local
 
 ```bash
-yarn start
+pnpm start
 ```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
 
 ## Build
 
 ```bash
-yarn build
+pnpm build
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-## Deployment
-
-Using SSH:
+## Typecheck
 
 ```bash
-USE_SSH=true yarn deploy
+pnpm typecheck
 ```
 
-Not using SSH:
+## Notas
 
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+- Ejecuta estos comandos dentro de `docs\`.
+- La configuracion del sitio vive en `docusaurus.config.ts`.
+- La documentacion fuente vive en `docs\docs\` y la bitacora en `docs\bitacora\`.

@@ -7,6 +7,8 @@ tags: [arquitectura, nextjs, pwa, frontend]
 
 **Contexto:** El requerimiento original sugería React Native (Expo) y un backend en Nest.js.
 
+{/* truncate */}
+
 **Problema:** Mantener un ecosistema móvil nativo separado de la web para un MVP añade sobrecarga de desarrollo y mantenimiento (Turborepo).
 
 **Decisión:** Pivotar a una Progressive Web App (PWA) construida con Next.js.

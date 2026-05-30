@@ -6,7 +6,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Cicero',
-  tagline: 'Domina tu oratoria',
+  tagline: 'Arquitectura, decisiones y estado de transicion',
   favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -15,15 +15,15 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-site.example.com',
+  url: 'https://vgmil-dev.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: '/cicero/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'docusaurus', // Usually your repo name.
+  organizationName: 'VGMil-dev',
+  projectName: 'cicero',
 
   onBrokenLinks: 'throw',
 
@@ -46,10 +46,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+          editUrl: 'https://github.com/VGMil-dev/cicero/edit/main/docs/',
         },
         blog: {
           showReadingTime: true,
@@ -71,7 +68,6 @@ const config: Config = {
     mermaid: {
       theme: {light: 'neutral', dark: 'neutral'},
     },
-    // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     colorMode: {
       respectPrefersColorScheme: true,
@@ -87,7 +83,7 @@ const config: Config = {
           type: 'docSidebar',
           sidebarId: 'mainSidebar',
           position: 'left',
-          label: 'Arquitectura',
+          label: 'Documentacion',
         },
         {
           to: '/bitacora',
@@ -95,7 +91,7 @@ const config: Config = {
           position: 'left',
         },
         {
-          href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/VGMil-dev/cicero',
           label: 'GitHub',
           position: 'right',
         },
@@ -108,39 +104,35 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
+              label: 'Introduccion',
               to: '/docs/intro',
             },
+            {
+              label: 'Arquitectura',
+              to: '/docs/arquitectura',
+            },
           ],
         },
         {
-          title: 'Community',
+          title: 'Bitacora',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-            },
-            {
-              label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
-            },
-            {
-              label: 'X',
-              href: 'https://x.com/docusaurus',
+              label: 'Decisiones',
+              to: '/bitacora',
             },
           ],
         },
         {
-          title: 'Más',
+          title: 'Proyecto',
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              href: 'https://github.com/VGMil-dev/cicero',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Cicero. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Cicero.`,
     },
     prism: {
       theme: prismThemes.github,

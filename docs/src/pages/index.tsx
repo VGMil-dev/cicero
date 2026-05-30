@@ -21,7 +21,10 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro">
-            Docusaurus Tutorial - 5min ⏱️
+            Leer introduccion
+          </Link>
+          <Link className="button button--outline button--lg" to="/docs/arquitectura">
+            Ver arquitectura
           </Link>
         </div>
       </div>
@@ -33,8 +36,8 @@ export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title="Documentacion"
+      description="Documentacion tecnica de Cicero: vision objetivo, arquitectura y estado actual en transicion.">
       <HomepageHeader />
       <main>
         <HomepageFeatures />

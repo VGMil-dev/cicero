@@ -1,6 +1,6 @@
 # Decisiones de Diseño
 
-En esta sección se detallan las decisiones arquitectónicas clave tomadas para el proyecto **Cicero**, justificando el pivote estratégico para garantizar escalabilidad, costo cero en inferencia y alta precisión en la detección de disfluencias.
+En esta seccion se detallan las decisiones arquitectonicas clave para **Cicero**. Estas paginas describen la direccion tecnica preferida del proyecto y el estado de transicion del repositorio; no todas las piezas deben leerse como implementacion cerrada.
 
 ## 🤖 Transformers.js sobre Vosk (El Motor de IA)
 Inicialmente se evaluó `vosk-browser` por su bajísima latencia. Sin embargo, se decidió pivotar hacia **Transformers.js (Hugging Face)** por tres razones arquitectónicas críticas:
@@ -8,14 +8,16 @@ Inicialmente se evaluó `vosk-browser` por su bajísima latencia. Sin embargo, s
 2.  **Transcripción Verbatim (El problema de Whisper):** Los modelos tradicionales de Speech-to-Text limpian el audio (borran los "eh" y "mmm"). Al usar Transformers.js, podemos cargar **CrisperWhisper**, un modelo ONNX especializado específicamente en transcripción literal que *retiene* las muletillas y provee timestamps precisos por palabra, lo cual es el core de nuestra aplicación.
 3.  **Aceleración de Hardware:** Transformers.js (v3) soporta **WebGPU**, lo que permite delegar la inferencia a la tarjeta gráfica del usuario en lugar de bloquear la CPU, logrando velocidades de procesamiento muy superiores.
 
-## 📱 Estrategia PWA sobre App Nativa (React Native/Flutter)
-El requerimiento original sugería un framework híbrido móvil tradicional. Pivotamos hacia una **Progressive Web App (PWA)** en Next.js.
-- **Justificación**: Las apps híbridas enfrentan enormes dificultades para compilar modelos acústicos complejos (C++) en iOS/Android. La PWA nos permite descargar el modelo ONNX en la caché del navegador de forma transparente, logrando procesamiento $0 en servidor y sin depender de APIs de terceros (No Vendor Lock-in de OpenAI).
+## 🌐 Estrategia Web-First con PWA
+El requerimiento original exploro una app movil hibrida tradicional. En la etapa actual priorizamos una **Progressive Web App (PWA)** en Next.js como frente principal de validacion.
+- **Justificacion**: La web nos permite iterar mas rapido sobre el flujo central, descargar el modelo ONNX en la cache del navegador y aprovechar APIs modernas del cliente sin duplicar complejidad desde el inicio.
+- **Nota de transicion**: Esto no impide una experiencia movil futura, pero evita abrir dos frentes de implementacion antes de validar el camino principal.
 
-## 🚀 Eliminación del Backend Tradicional (Serverless / BaaS)
-Se descartó el diseño inicial de usar una API centralizada (Nest.js).
-- **Cero Cuellos de Botella**: Procesar audio en un backend central genera altos costos de CPU. Al delegar la inferencia al dispositivo del usuario (Client-Side AI), el backend es redundante.
-- **Supabase directo**: Usamos Supabase interactuando de forma segura a través de **Server Actions** nativas de Next.js.
+## 🚀 Reduccion del Backend Tradicional (Serverless / BaaS)
+Se reduce el diseno inicial de una API centralizada dedicada.
+- **Menos cuellos de botella**: Procesar audio en un backend central genera costos altos de CPU y red. Al delegar la inferencia al dispositivo del usuario (Client-Side AI), la necesidad de una capa backend propia disminuye de forma importante.
+- **Supabase directo**: La direccion objetivo es apoyarse en Supabase y capacidades serverless o **Server Actions** para persistencia y coordinacion ligera.
+- **Nota de transicion**: Si aparecen requisitos que lo justifiquen, una capa backend dedicada podria reintroducirse de forma acotada. La preferencia actual es no hacerla el centro de la arquitectura.
 
 ## 📐 Patrones Arquitectónicos (Clean Architecture)
 Para evitar quedar atados a Supabase y cumplir con los estándares de mantenibilidad, aplicamos **Clean Architecture (Ports & Adapters)**:
@@ -30,7 +32,7 @@ Para evitar que la descarga y procesamiento de modelos de ~50MB congelen la inte
 - **Carga en Segundo Plano**: Al ejecutarse en un hilo del procesador independiente, la UI de React permanece reactiva incluso durante procesos intensivos de inferencia (transcripción).
 - **Feedback de Usuario (Progress Events)**: El Web Worker envía mensajes de estado al hilo principal mediante `progress_callback`, permitiendo mostrar barras de carga precisas ("Descargando modelo... 45%").
 - **Optimización de Caché**: Se utiliza la Cache API del navegador de forma transparente a través de Transformers.js, garantizando que tras la primera descarga, el acceso al modelo sea casi instantáneo y offline.
-- **Configuración Webpack**: Se ajusta la configuración de Next.js para ignorar binarios de servidor (`onnxruntime-node`) en el bundle del cliente, garantizando la compatibilidad total con el entorno del navegador.
+- **Configuracion Webpack**: Se ajusta la configuracion de la aplicacion web para ignorar binarios de servidor (`onnxruntime-node`) en el bundle del cliente, garantizando compatibilidad con el entorno del navegador.
 
 ## 🛡️ Resiliencia y Manejo de Errores Críticos (Zero Trust)
 Dado que la inferencia ocurre en el dispositivo del usuario, el entorno es impredecible. Se implementa una política de "Desconfianza Total" para garantizar la estabilidad de la PWA.

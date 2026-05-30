@@ -11,32 +11,32 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Problema y propuesta',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Cicero busca mejorar la oratoria detectando muletillas y ofreciendo
+        feedback util a partir de audio grabado localmente.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Arquitectura y decisiones',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        La documentacion explica la arquitectura objetivo, las decisiones clave
+        y los trade-offs tecnicos del proyecto.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Estado actual y transicion',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        El sitio distingue entre vision objetivo, estado actual y decisiones en
+        transicion para que el contexto sea confiable.
       </>
     ),
   },

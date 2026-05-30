@@ -7,6 +7,8 @@ tags: [arquitectura, performance, web-workers, resiliencia, pwa]
 
 **Contexto:** Integración del modelo de inferencia de Transformers.js (aprox. 50MB) en el cliente.
 
+{/* truncate */}
+
 **Problema 1:** La carga e inicialización del modelo en el hilo principal bloqueaba la UI de React, afectando gravemente la experiencia de usuario.
 
 **Problema 2:** En entornos de PWA, variables como conexiones inestables, límites de memoria (Out of Memory en móviles) y fallos del driver de WebGPU pueden provocar cierres silenciosos o corrupciones.

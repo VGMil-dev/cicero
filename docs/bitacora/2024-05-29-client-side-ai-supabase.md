@@ -7,6 +7,8 @@ tags: [arquitectura, serverless, supabase, ia, backend]
 
 **Contexto:** Procesar audio en tiempo real para múltiples usuarios simultáneos.
 
+{/* truncate */}
+
 **Problema:** Enviar streams de audio a Nest.js genera cuellos de botella en la red, alto consumo de CPU en el servidor y costos recurrentes en APIs de terceros.
 
 **Decisión:** 
