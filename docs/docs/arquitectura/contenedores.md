@@ -9,8 +9,7 @@ flowchart TD
     Admin((Administrador))
 
     subgraph Clients [Capa de Clientes]
-        MobileApp[Mobile App<br/>Expo / React Native]
-        WebApp[Web App<br/>Next.js]
+        PWA[PWA Client<br/>Next.js]
     end
 
     subgraph Backend [Core Backend]
@@ -23,13 +22,11 @@ flowchart TD
     end
 
     %% Relaciones de Usuario a Clientes
-    User -->|Graba voz y consulta scores| MobileApp
-    User -->|Graba voz y consulta scores| WebApp
-    Admin -->|Audita métricas| WebApp
+    User -->|Graba voz y consulta scores| PWA
+    Admin -->|Audita métricas| PWA
 
     %% Relaciones de Clientes a API
-    MobileApp -->|Envía audio / Pide datos| NestAPI
-    WebApp -->|Envía audio / Pide datos| NestAPI
+    PWA -->|Envía audio / Pide datos| NestAPI
 
     %% Relaciones Internas del Backend
     NestAPI -->|Delega procesamiento| MockIA
@@ -41,7 +38,7 @@ flowchart TD
 
 ## Descripción de Contenedores
 
-1.  **Capa de Clientes (Mobile & Web)**: Clientes ligeros responsables únicamente de la captura de audio (UI/UX) y visualización de resultados. Consumen la API centralizada para todas las operaciones de negocio.
+1.  **Capa de Clientes (PWA)**: Aplicación Web Progresiva responsable de la captura de audio (UI/UX) y visualización de resultados. Funciona tanto en dispositivos móviles como de escritorio, permitiendo la instalación en la pantalla de inicio. Consume la API centralizada para todas las operaciones de negocio.
 2.  **API REST (Nest.js)**: Orquestador principal del sistema. Recibe el audio de los clientes, invoca el módulo de análisis, calcula los scores y maneja la persistencia de manera segura.
 3.  **Mock IA Script (TypeScript)**: Módulo interno de la API que simula el procesamiento de voz a texto y la detección de muletillas.
 4.  **Supabase**: Proveedor de infraestructura (BD relacional y Storage) accedido exclusivamente a través del backend para garantizar la integridad y seguridad de los datos.

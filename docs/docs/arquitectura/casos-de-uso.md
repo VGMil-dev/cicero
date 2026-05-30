@@ -6,13 +6,13 @@ En esta sección se detallan los comportamientos esperados del sistema (MVP de C
 
 ## 🎙️ Feature 1: Grabación de Discurso
 **Como** usuario que desea mejorar su oratoria,
-**Quiero** poder grabar mi voz de forma fluida a través de la aplicación (Web o Mobile),
+**Quiero** poder grabar mi voz de forma fluida a través de la aplicación (PWA),
 **Para** someter mi discurso a un análisis de limpieza.
 
 ### Scenario: El usuario concede permisos e inicia la grabación
 > **Given** que el usuario abre la pantalla de grabación por primera vez
 > **When** presiona el botón de "Iniciar Grabación"
-> **Then** el sistema solicita permisos de acceso al micrófono del dispositivo
+> **Then** el navegador solicita permisos de acceso al micrófono del dispositivo
 > **And** si el permiso es concedido, la grabación comienza inmediatamente
 > **And** se muestra un indicador visual de grabación en progreso (con temporizador)
 
@@ -57,7 +57,7 @@ En esta sección se detallan los comportamientos esperados del sistema (MVP de C
 ### Scenario: Visualización inmediata del Score en la App
 > **Given** que el análisis del audio ha finalizado exitosamente
 > **When** la API devuelve el objeto "Score" y el texto transcrito al cliente
-> **Then** la aplicación (Mobile/Web) muestra la pantalla de resumen
+> **Then** la aplicación (PWA) muestra la pantalla de resumen
 > **And** se visualiza la duración y el porcentaje de "limpieza" del discurso
 > **And** el texto transcrito se renderiza resaltando visualmente las muletillas detectadas
 
@@ -67,4 +67,4 @@ En esta sección se detallan los comportamientos esperados del sistema (MVP de C
 > **Then** la API invoca al `Supabase DB Adapter`
 > **And** se guarda de forma segura el registro (Score, texto, fecha y usuario/sesión) en la base de datos PostgreSQL
 > **And** el backend descarta el archivo de audio temporal (para ahorrar almacenamiento en el MVP)
-> **And** los datos quedan disponibles de inmediato para su consulta histórica en la Web App
+> **And** los datos quedan disponibles de inmediato para su consulta histórica en la PWA

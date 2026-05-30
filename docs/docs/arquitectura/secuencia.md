@@ -10,7 +10,7 @@ Este diagrama representa el escenario principal (Happy Path) detallado en la sec
 sequenceDiagram
     autonumber
     
-    actor Client as Cliente<br/>(Mobile / Web App)
+    actor Client as Cliente (PWA)
     
     box Core Backend (Nest.js)
         participant Ctrl as REST Controller<br/>(Driver)
@@ -55,7 +55,7 @@ sequenceDiagram
 ```
 
 ### Explicación del Flujo
-1.  **Petición Inicial**: El usuario finaliza la grabación y el cliente (`Mobile` o `Web`) envía el audio a la ruta expuesta por el controlador REST (Adaptador Primario).
+1.  **Petición Inicial**: El usuario finaliza la grabación y el cliente (`PWA`) envía el audio a la ruta expuesta por el controlador REST (Adaptador Primario).
 2.  **Delegación al Dominio**: El controlador no procesa reglas de negocio, solo valida el formato (DTO) y pasa los datos al Caso de Uso (`AnalyzeAudioUseCase`).
 3.  **Procesamiento (Mock IA)**: El caso de uso necesita analizar el texto, por lo que invoca la interfaz `ISpeechToText`. El adaptador de Mock IA recibe esta llamada, procesa el audio simulando una IA real y devuelve los conteos.
 4.  **Lógica Central**: Con los datos de la IA, el Caso de Uso calcula el porcentaje de limpieza (ej. `(palabras totales - muletillas) / palabras totales * 100`) y crea una Entidad de Dominio `Score`.
