@@ -1,0 +1,18 @@
+﻿<tokens>
+  <colors>
+    <primary>#DFFF00</primary> <!-- Neon Lime -->
+    <surface>#F9F9F9</surface> <!-- Paper White -->
+    <stroke>#000000</stroke>  <!-- Solid Black -->
+    <pastel-pink>#FFDAD6</pastel-pink>
+    <pastel-lavender>#E1E1F5</pastel-lavender>
+  </colors>
+  <typography>
+    <headline font="Plus Jakarta Sans" weight="800" />
+    <body font="Be Vietnam Pro" weight="400" />
+  </typography>
+  <spacing base="4px" card-padding="24px" gutter="16px" />
+  <elevation>
+    <level-1 offset="4px" blur="0px" />
+    <level-2 offset="6px" blur="0px" />
+  </elevation>
+</tokens>

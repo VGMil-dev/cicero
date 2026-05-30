@@ -1,0 +1,15 @@
+﻿<components>
+  <button>
+    <base>border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-lg font-bold</base>
+    <interaction>active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]</interaction>
+  </button>
+  <card>
+    <base>border-3 border-black bg-surface rounded-xl p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]</base>
+    <background>bg-[radial-gradient(#000_1px,transparent_0)] bg-[size:20px_20px]</background>
+  </card>
+  <segmented-progress>
+    <container>flex gap-1 h-4 w-full</container>
+    <segment>h-full border-2 border-black rounded-full bg-pastel-pink transition-all</segment>
+    <active>bg-primary</active>
+  </segmented-progress>
+</components>
