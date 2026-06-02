@@ -9,14 +9,34 @@ Cicero utiliza un monorepo gestionado por **Turborepo** y **pnpm workspaces** pa
 - **`packages/eslint-config`**: Configuraciones compartidas de ESLint y Prettier.
 - **`packages/typescript-config`**: Configuraciones base de TypeScript (`tsconfig.json`).
 
-## Comandos Principales
+## Comandos Principales (Atajos)
 
-Desde la raíz del proyecto, puedes usar los siguientes comandos orquestados por Turbo:
+Para facilitar el desarrollo, el `package.json` de la raíz incluye atajos (shortcuts) que orquestan Turborepo y pnpm de forma transparente. Siempre debes ejecutarlos desde la **raíz del proyecto**.
 
-- `pnpm dev`: Inicia todos los entornos de desarrollo en paralelo.
+### Flujo de Desarrollo (Dev)
+- `pnpm dev`: **(Recomendado)** Levanta todas las aplicaciones en paralelo (Next.js en el puerto 3000, Docusaurus en el 3001).
+- `pnpm dev:web`: Levanta *solo* la aplicación web.
+- `pnpm dev:docs`: Levanta *solo* la documentación.
+
+### Calidad y Testing
+- `pnpm test`: Ejecuta la suite de pruebas (Jest) en todo el monorepo.
+- `pnpm test:web`: Ejecuta los tests solo en la aplicación web.
+- `pnpm test:watch`: Corre los tests de la web en modo observación (ideal para TDD).
+- `pnpm lint`: Ejecuta ESLint en todos los proyectos para garantizar el estándar de código.
+
+### Compilación (Build)
 - `pnpm build`: Compila todas las aplicaciones para producción.
-- `pnpm lint`: Ejecuta el análisis estático de código.
-- `pnpm test`: Ejecuta la suite de pruebas con Jest.
+- `pnpm build:web`: Compila solo la aplicación web.
+- `pnpm build:docs`: Compila solo la documentación.
+
+### 🚨 El "Botón de Pánico" (Clean)
+Si notas comportamientos extraños (cambios que no se reflejan, errores incomprensibles de compilación), es probable que las agresivas cachés de Next.js o Turborepo estén corruptas. 
+
+Utiliza este comando para purgar todas las cachés y forzar un estado limpio:
+```bash
+pnpm clean
+```
+*(Tras ejecutarlo, simplemente vuelve a correr `pnpm dev`)*.
 
 ## Integración Continua (CI)
 
