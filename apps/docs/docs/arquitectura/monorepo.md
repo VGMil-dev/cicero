@@ -23,6 +23,9 @@ Para facilitar el desarrollo, el `package.json` de la raíz incluye atajos (shor
 - `pnpm test:web`: Ejecuta los tests solo en la aplicación web.
 - `pnpm test:watch`: Corre los tests de la web en modo observación (ideal para TDD).
 - `pnpm lint`: Ejecuta ESLint en todos los proyectos para garantizar el estándar de código.
+- `pnpm typecheck`: Ejecuta el typecheck de los workspaces que lo soportan.
+- `pnpm typecheck:docs`: Ejecuta el typecheck solo de la documentación.
+- `pnpm typecheck:web`: Ejecuta el typecheck solo de la aplicación web.
 
 ### Compilación (Build)
 - `pnpm build`: Compila todas las aplicaciones para producción.

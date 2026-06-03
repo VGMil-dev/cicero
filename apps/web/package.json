@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint src",
     "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@serwist/next": "^9.0.0",

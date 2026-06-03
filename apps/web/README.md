@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<p align="center">
+  <img src="../../assets/logo.png" alt="Cicero" width="140" />
+</p>
 
-## Getting Started
+<h1 align="center">Web de Cicero</h1>
 
-First, run the development server:
+Aplicacion principal de Cicero construida con **Next.js 16** y enfoque **PWA**.
+
+## Requisitos
+
+- Node.js 20 o superior
+- pnpm
+
+## Instalacion
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Desarrollo local
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Desde la raiz del repositorio:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm dev:web
+```
 
-## Learn More
+O desde `apps\web\`:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Build
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Desde la raiz del repositorio:
 
-## Deploy on Vercel
+```bash
+pnpm build:web
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+O desde `apps\web\`:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm build
+```
+
+## Test
+
+Desde la raiz del repositorio:
+
+```bash
+pnpm test:web
+```
+
+O desde `apps\web\`:
+
+```bash
+pnpm test
+```
+
+## Typecheck
+
+Desde la raiz del repositorio:
+
+```bash
+pnpm typecheck:web
+```
+
+O desde `apps\web\`:
+
+```bash
+pnpm typecheck
+```
+
+## Lint
+
+Desde la raiz del repositorio:
+
+```bash
+pnpm lint
+```
+
+O desde `apps\web\`:
+
+```bash
+pnpm lint
+```
+
+## Notas
+
+- Para `dev`, `build`, `test` y `typecheck`, prioriza los atajos del `package.json` raiz.
+- Si prefieres entrar al workspace, ejecuta estos comandos dentro de `apps\web\`.
+- Esta app usa `next dev --webpack` y `next build --webpack` para mantener compatibilidad con Serwist.
