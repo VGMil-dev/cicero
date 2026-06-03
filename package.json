@@ -14,11 +14,11 @@
     "test:watch": "pnpm --filter @cicero/web test --watch",
     "build:web": "pnpm --filter @cicero/web build",
     "build:docs": "pnpm --filter @cicero/docs build",
-    "clean": "npx rimraf .turbo apps/web/.next apps/docs/.docusaurus node_modules/.cache/turbo"
+    "clean": "pnpm dlx rimraf .turbo apps/web/.next apps/docs/.docusaurus node_modules/.cache/turbo"
   },
   "devDependencies": {
-    "prettier": "latest",
-    "turbo": "latest"
+    "prettier": "^3.0.0",
+    "turbo": "^2.0.0"
   },
   "engines": {
     "node": ">=20.0.0"
