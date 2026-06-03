@@ -20,6 +20,7 @@ const sidebars: SidebarsConfig = {
       label: 'Arquitectura',
       items: [
         'arquitectura/index',
+        'arquitectura/monorepo',
         'arquitectura/contenedores',
         'arquitectura/componentes',
         'arquitectura/secuencia',

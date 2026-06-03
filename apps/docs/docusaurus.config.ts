@@ -46,7 +46,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/VGMil-dev/cicero/edit/main/docs/',
+          editUrl: 'https://github.com/VGMil-dev/cicero/edit/main/apps/docs/',
         },
         blog: {
           showReadingTime: true,
