@@ -5,58 +5,61 @@
 <h1 align="center">Cicero</h1>
 
 <p align="center">
-  Analisis de oratoria y deteccion de muletillas a partir de audio grabado localmente.
+  Análisis de oratoria y detección de muletillas a partir de audio grabado localmente.
 </p>
 
 <p align="center">
-  <a href="./docs/docs/intro.md"><strong>Introduccion</strong></a>
+  <a href="./apps/docs/docs/intro.md"><strong>Introducción</strong></a>
   ·
-  <a href="./docs/docs/arquitectura/index.md"><strong>Arquitectura</strong></a>
+  <a href="./apps/docs/docs/arquitectura/index.md"><strong>Arquitectura</strong></a>
   ·
-  <a href="./docs/bitacora"><strong>Bitacora</strong></a>
+  <a href="./apps/docs/bitacora"><strong>Bitácora</strong></a>
 </p>
 
 ---
 
-## Que representa este repositorio
+## Qué representa este repositorio
 
-Este repositorio concentra la documentacion tecnica de **Cicero** y el contexto de una arquitectura que sigue en consolidacion. La carpeta `docs/` es la referencia principal para entender tres capas que ahora estan separadas de forma explicita:
+Este repositorio es un **Monorepo** (gestionado con Turborepo y pnpm workspaces) que concentra tanto la aplicación PWA principal como su documentación técnica.
 
-| Capa | Que responde |
+| Directorio | Propósito |
 | --- | --- |
-| **Vision objetivo** | Hacia donde va el producto |
-| **Estado actual** | Que refleja hoy el repositorio |
-| **Transicion** | Que decisiones ya fueron tomadas y siguen aterrizando |
+| **`apps/web`** | Aplicación principal (Next.js PWA + Transformers.js). |
+| **`apps/docs`** | Documentación técnica y bitácora de decisiones (Docusaurus). |
+| **`packages/*`** | Configuraciones compartidas (ESLint, TypeScript). |
 
 > [!IMPORTANT]
-> La fuente de verdad para la direccion tecnica actual vive en `docs/`.
+> La fuente de verdad para la dirección técnica actual vive en `apps/docs/`.
 
-## Direccion tecnica actual
+## Dirección técnica actual
 
-| Frente | Decision actual |
+| Frente | Decisión actual |
 | --- | --- |
-| **Experiencia principal** | Web-first con Next.js y capacidades PWA |
-| **Procesamiento de audio** | Analisis local en el dispositivo del usuario |
+| **Experiencia principal** | Web-first con Next.js y capacidades PWA (Serwist) |
+| **Procesamiento de audio** | Análisis local (Transformers.js / Web Workers) |
 | **Persistencia** | Supabase |
-| **Arquitectura** | Hexagonal + Vertical Slicing |
-| **Estrategia movil** | Linea futura, subordinada a validar primero la experiencia web |
+| **Arquitectura interna** | Hexagonal + Vertical Slicing |
+| **Infraestructura** | Turborepo, Jest, GitHub Actions |
 
-## Estado del repo
+## Por dónde empezar
 
-La implementacion sigue consolidandose. Por eso algunas decisiones historicas todavia aparecen en la bitacora o en documentos previos; el punto de partida correcto para entender el proyecto hoy es la documentacion central.
+1. **[`apps/docs/docs/intro.md`](./apps/docs/docs/intro.md)** para entender el marco general del proyecto.
+2. **[`apps/docs/docs/arquitectura/monorepo.md`](./apps/docs/docs/arquitectura/monorepo.md)** para entender la infraestructura actual.
+3. **[`apps/docs/bitacora/`](./apps/docs/bitacora)** para ver el historial de decisiones y pivotes.
 
-## Por donde empezar
+## Desarrollo Local
 
-1. **[`docs/docs/intro.md`](./docs/docs/intro.md)** para entender el marco general del proyecto.
-2. **[`docs/docs/arquitectura/index.md`](./docs/docs/arquitectura/index.md)** para revisar la direccion tecnica objetivo.
-3. **[`docs/bitacora/`](./docs/bitacora)** para ver el historial de decisiones y pivotes.
-
-## Documentacion local
+Dado que es un monorepo, los comandos se ejecutan desde la **raíz del proyecto**:
 
 ```bash
-cd docs
+# 1. Instalar dependencias
 pnpm install
-pnpm start
+
+# 2. Levantar PWA y Documentación en paralelo
+pnpm dev
 ```
 
-La configuracion del sitio vive en `docs/docusaurus.config.ts`.
+- La **PWA** estará disponible en `http://localhost:3000`
+- La **Documentación** estará disponible en `http://localhost:3001`
+
+Para ver otros comandos útiles (testing, linting, build), revisa la [Guía del Monorepo](./apps/docs/docs/arquitectura/monorepo.md) o el `package.json` de la raíz.
