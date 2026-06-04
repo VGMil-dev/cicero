@@ -91,7 +91,67 @@ export interface IAudioRecorder {
 
 ## Estrategia de Implementación: Mock-First
 
-Para evitar bloqueos entre equipos, la arquitectura promueve el uso de implementaciones **Mock** iniciales:
+Para evitar bloqueos entre equipos, la arquitectura promueve el uso de implementaciones **Mock** iniciales mediante el patrón de Puertos y Adaptadores.
 
-- **UI Development**: Utilizará `FakeAudioModelBootstrap` y `FakeAudioRecorder` (pendientes de implementar) para validar estados de carga y transiciones de pantalla sin necesidad de hardware o modelos reales.
-- **Integración Real**: Posteriormente se implementarán los adaptadores para `Transformers.js` y la API nativa de `MediaRecorder` cumpliendo estas mismas interfaces.
+### Diagrama de Componentes (Inyección de Dependencias)
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#f4f4f4', 'edgeLabelBackground':'#ffffff'}}}%%
+classDiagram
+    direction TB
+    
+    %% Capa de Presentación
+    class RecordUIComponent {
+        <<UI Component>>
+        +iniciarGrabacion()
+    }
+
+    %% Capa Core (Puertos)
+    namespace Core_Ports {
+        class IAudioModelBootstrap {
+            <<Interface>>
+            +initialize()
+            +onProgress()
+            +getState()
+        }
+        class IAudioRecorder {
+            <<Interface>>
+            +requestPermissions()
+            +startRecording()
+            +stopRecording()
+        }
+    }
+
+    %% Capa de Infraestructura (Adaptadores Mock)
+    namespace Mock_Adapters {
+        class FakeAudioModelBootstrap {
+            <<Adapter>>
+        }
+        class FakeAudioRecorder {
+            <<Adapter>>
+        }
+    }
+
+    %% Capa de Infraestructura (Adaptadores Reales)
+    namespace Real_Adapters {
+        class WorkerAudioModelBootstrap {
+            <<Adapter (Transformers.js)>>
+        }
+        class BrowserMediaRecorder {
+            <<Adapter (Web API)>>
+        }
+    }
+
+    %% Relaciones
+    RecordUIComponent ..> IAudioModelBootstrap : Usa
+    RecordUIComponent ..> IAudioRecorder : Usa
+    
+    FakeAudioModelBootstrap ..|> IAudioModelBootstrap : Implementa (Fase 1)
+    FakeAudioRecorder ..|> IAudioRecorder : Implementa (Fase 1)
+    
+    WorkerAudioModelBootstrap ..|> IAudioModelBootstrap : Implementa (Fase 2)
+    BrowserMediaRecorder ..|> IAudioRecorder : Implementa (Fase 2)
+```
+
+- **Fase 1 (UI Development)**: Utilizará `FakeAudioModelBootstrap` y `FakeAudioRecorder` (pendientes de implementar) para validar estados de carga y transiciones de pantalla sin necesidad de hardware o modelos reales.
+- **Fase 2 (Integración Real)**: Posteriormente se implementarán los adaptadores para `Transformers.js` (Worker) y la API nativa de `MediaRecorder` cumpliendo estas mismas interfaces, inyectándose en la UI sin requerir cambios en la vista.
