@@ -26,6 +26,7 @@ const sidebars: SidebarsConfig = {
         'arquitectura/secuencia',
         'arquitectura/casos-de-uso',
         'arquitectura/decisiones',
+        'arquitectura/contratos-captura',
       ],
     },
     {
