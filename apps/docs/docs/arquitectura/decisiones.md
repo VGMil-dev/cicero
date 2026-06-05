@@ -46,4 +46,12 @@ Dado que la inferencia ocurre en el dispositivo del usuario, el entorno es impre
     - **Hardware Fallback**: Si el acceso a WebGPU falla o el driver de video crashea, el sistema debe reintentar automáticamente la carga usando WASM (CPU).
     - **Fatal Error Monitor**: React monitorea `worker.onerror` para detectar pánicos de WASM que no son capturados por el `try/catch` tradicional. Ante un crash, la UI aplica `worker.terminate()` y ofrece un mecanismo de reinicio limpio ("IA Reset").
 
+## 🎭 Desarrollo Desacoplado: Estrategia "Mock-First"
+Para evitar que el desarrollo de la Interfaz de Usuario (Front-end) quede bloqueado esperando la implementación compleja de los Web Workers de IA o la integración con hardware real (Micrófonos), se adopta una política de desarrollo **Mock-First** guiada por contratos.
+
+- **Puertos Estrictos**: Toda interacción con hardware o IA se define mediante interfaces TypeScript (Puertos) en la capa Core (ej. `IAudioModelBootstrap`, `IAudioRecorder`).
+- **Fakes Controlables**: Se implementan clases `Fake` que respetan estos contratos pero no tocan APIs reales. Estas clases exponen configuraciones (Fixtures) para simular escenarios específicos (ej. forzar un error de red al 50% de la carga del modelo, o simular que el usuario deniega permisos).
+- **Inyección de Dependencias**: La UI consume estas dependencias mediante inyección en Hooks o Stores. Cuando los adaptadores reales (Worker, MediaRecorder) estén listos en una Fase 2, se intercambiarán por los Fakes sin requerir **ninguna** modificación en el código de los componentes visuales de React.
+- **Gobernanza de Estado**: Los adaptadores (Fakes o Reales) deben ser fieles a su contrato. Si la interfaz no define un estado global, el adaptador no debe gestionarlo internamente, delegando esa orquestación a la capa de aplicación.
+
 
