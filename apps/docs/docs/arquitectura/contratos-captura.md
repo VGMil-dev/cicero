@@ -5,7 +5,7 @@ sidebar_label: "Contratos de Captura"
 
 # Contratos: Inicialización y Captura
 
-:::info Objetivo
+:::info[Objetivo]
 Definir los contratos base del slice de captura para estandarizar el lenguaje técnico entre Front, Back y DevSecOps. Estos contratos están implementados como Puertos en la capa Core de la aplicación web.
 :::
 
@@ -153,5 +153,8 @@ classDiagram
     BrowserMediaRecorder ..|> IAudioRecorder : Implementa (Fase 2)
 ```
 
-- **Fase 1 (UI Development)**: Utilizará `FakeAudioModelBootstrap` y `FakeAudioRecorder` (pendientes de implementar) para validar estados de carga y transiciones de pantalla sin necesidad de hardware o modelos reales.
+- **Fase 1 (UI Development)**: Utiliza `FakeAudioModelBootstrap` y `FakeAudioRecorder` para validar estados de carga y transiciones de pantalla sin necesidad de hardware o modelos reales.
 - **Fase 2 (Integración Real)**: Posteriormente se implementarán los adaptadores para `Transformers.js` (Worker) y la API nativa de `MediaRecorder` cumpliendo estas mismas interfaces, inyectándose en la UI sin requerir cambios en la vista.
+
+> 📖 Para ejemplos detallados de uso de los mocks, incluyendo escenarios de error
+> e inyección en componentes React, consultar [Mocks de Captura](./mocks-captura.md).
