@@ -23,6 +23,11 @@ Gracias al patrón de Puertos y Adaptadores, la UI se inyecta la implementación
 que necesita sin cambiar su código. En Fase 1 usamos Fakes; en Fase 2 se
 reemplazan por adaptadores reales.
 
+> **Nota:** `FakeAudioRecorder` **no** gestiona estado interno (`idle`, `recording`, etc.)
+> porque `IAudioRecorder` no expone `getState()`. El estado global de captura
+> es orquestado por un Hook o Store de React que consume ambas interfaces
+> (`IAudioModelBootstrap` + `IAudioRecorder`).
+
 ## Cómo usar
 
 ```typescript
