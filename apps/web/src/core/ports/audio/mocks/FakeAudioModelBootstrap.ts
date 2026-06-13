@@ -1,5 +1,5 @@
 import { IAudioModelBootstrap } from '../IAudioModelBootstrap';
-import { AudioCaptureState, ErrorCode, ErrorDTO, ProgressDTO } from '../types';
+import { AudioCaptureState, ProgressDTO } from '../types';
 import { CaptureError } from '../CaptureError';
 
 /**
