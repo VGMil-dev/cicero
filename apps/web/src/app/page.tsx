@@ -2,29 +2,40 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { FakeAudioModelBootstrap, FakeAudioRecorder } from '../core/ports/audio/mocks';
+import { WorkerAudioModelBootstrap } from '../core/adapters/audio/WorkerAudioModelBootstrap';
+import { BrowserMediaRecorder } from '../core/adapters/audio/BrowserMediaRecorder';
 import { useAudioCapture } from '../hooks/useAudioCapture';
 
 export default function Home() {
+  // Mode configuration: real or mock implementation
+  const [useRealImplementation, setUseRealImplementation] = useState(true);
+
   // Mock configuration options
   const [shouldFailModel, setShouldFailModel] = useState(false);
   const [grantPermission, setGrantPermission] = useState(true);
   const [shouldFailOnStart, setShouldFailOnStart] = useState(false);
   const progressInterval = 400; // 400ms for quick but visible progress
 
-  // Re-instantiate mocks only when settings change
+  // Re-instantiate based on mode (Real or Mock)
   const bootstrap = useMemo(() => {
+    if (useRealImplementation) {
+      return new WorkerAudioModelBootstrap({ quantized: true });
+    }
     return new FakeAudioModelBootstrap({
       shouldFail: shouldFailModel,
       progressInterval: progressInterval,
     });
-  }, [shouldFailModel]);
+  }, [useRealImplementation, shouldFailModel]);
 
   const recorder = useMemo(() => {
+    if (useRealImplementation) {
+      return new BrowserMediaRecorder();
+    }
     return new FakeAudioRecorder({
       grantPermission: grantPermission,
       shouldFailOnStart: shouldFailOnStart,
     });
-  }, [grantPermission, shouldFailOnStart]);
+  }, [useRealImplementation, grantPermission, shouldFailOnStart]);
 
   // Hook orchestration
   const {
@@ -43,6 +54,32 @@ export default function Home() {
   useEffect(() => {
     initializeModel();
   }, [initializeModel]);
+
+  // Limpieza del Web Worker al desmontar o cambiar la implementación
+  useEffect(() => {
+    return () => {
+      if (bootstrap instanceof WorkerAudioModelBootstrap) {
+        bootstrap.terminate();
+      }
+    };
+  }, [bootstrap]);
+
+  // Escuchar pánicos del Web Worker a nivel de UI para diagnóstico
+  useEffect(() => {
+    if (!(bootstrap instanceof WorkerAudioModelBootstrap)) return;
+
+    const worker = bootstrap.getWorkerInstance();
+    if (!worker) return;
+
+    const handleFatalError = (e: ErrorEvent) => {
+      console.error("Crash fatal capturado en UI desde Web Worker:", e);
+    };
+
+    worker.addEventListener('error', handleFatalError);
+    return () => {
+      worker.removeEventListener('error', handleFatalError);
+    };
+  }, [bootstrap, state]);
 
   // Recording timer
   const [recordingTime, setRecordingTime] = useState(0);
@@ -409,10 +446,35 @@ export default function Home() {
             </p>
 
             <div className="space-y-5">
-              {/* Option 1: Model Load result */}
+              {/* Option 0: Real vs Mock Mode */}
               <div className="border-2 border-black p-3 bg-white rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                 <span className="block font-headline font-bold text-xs uppercase text-stone-500 mb-2">
-                  1. Carga de Modelo de IA
+                  🛠️ Modo de Ejecución
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setUseRealImplementation(true); reset(); }}
+                    className={`flex-1 py-1.5 text-xs font-extrabold border-2 border-black rounded-md transition-all uppercase
+                      ${useRealImplementation ? 'bg-neon-green text-black translate-y-[1px] shadow-[1px_1px_0px_rgba(0,0,0,1)]' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 shadow-[3px_3px_0px_rgba(0,0,0,1)]'}
+                    `}
+                  >
+                    Real
+                  </button>
+                  <button
+                    onClick={() => { setUseRealImplementation(false); reset(); }}
+                    className={`flex-1 py-1.5 text-xs font-extrabold border-2 border-black rounded-md transition-all uppercase
+                      ${!useRealImplementation ? 'bg-neon-green text-black translate-y-[1px] shadow-[1px_1px_0px_rgba(0,0,0,1)]' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 shadow-[3px_3px_0px_rgba(0,0,0,1)]'}
+                    `}
+                  >
+                    Mock
+                  </button>
+                </div>
+              </div>
+
+              {/* Option 1: Model Load result */}
+              <div className={`border-2 border-black p-3 bg-white rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-200 ${useRealImplementation ? 'opacity-40 pointer-events-none' : ''}`}>
+                <span className="block font-headline font-bold text-xs uppercase text-stone-500 mb-2">
+                  1. Carga de Modelo de IA (Mock)
                 </span>
                 <div className="flex gap-2">
                   <button
@@ -434,10 +496,10 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Option 2: Mic permissions */}
-              <div className="border-2 border-black p-3 bg-white rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+              {/* Option 2: Mic permissions (Mock) */}
+              <div className={`border-2 border-black p-3 bg-white rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-200 ${useRealImplementation ? 'opacity-40 pointer-events-none' : ''}`}>
                 <span className="block font-headline font-bold text-xs uppercase text-stone-500 mb-2">
-                  2. Permisos de Micrófono
+                  2. Permisos de Micrófono (Mock)
                 </span>
                 <div className="flex gap-2">
                   <button
@@ -459,10 +521,10 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Option 3: Recording Failure */}
-              <div className="border-2 border-black p-3 bg-white rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+              {/* Option 3: Recording Failure (Mock) */}
+              <div className={`border-2 border-black p-3 bg-white rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-200 ${useRealImplementation ? 'opacity-40 pointer-events-none' : ''}`}>
                 <span className="block font-headline font-bold text-xs uppercase text-stone-500 mb-2">
-                  3. Error al Iniciar Grabación
+                  3. Error al Iniciar Grabación (Mock)
                 </span>
                 <div className="flex gap-2">
                   <button

@@ -18,12 +18,12 @@ describe('BrowserMediaRecorder Adapter', () => {
   class MockMediaRecorder {
     static isTypeSupported = jest.fn();
     state: 'inactive' | 'recording' | 'paused' = 'inactive';
-    stream: any;
-    options?: any;
-    ondataavailable: ((event: any) => void) | null = null;
+    stream: unknown;
+    options?: MediaRecorderOptions;
+    ondataavailable: ((event: { data: Blob }) => void) | null = null;
     onstop: (() => void) | null = null;
 
-    constructor(stream: any, options?: any) {
+    constructor(stream: unknown, options?: MediaRecorderOptions) {
       this.stream = stream;
       this.options = options;
     }
@@ -50,7 +50,7 @@ describe('BrowserMediaRecorder Adapter', () => {
 
     // Define navigator.mediaDevices if not present
     if (!global.navigator) {
-      (global as any).navigator = {} as any;
+      (global as unknown as { navigator: Navigator }).navigator = {} as Navigator;
     }
     
     Object.defineProperty(global.navigator, 'mediaDevices', {
@@ -61,7 +61,7 @@ describe('BrowserMediaRecorder Adapter', () => {
       },
     });
 
-    global.MediaRecorder = MockMediaRecorder as any;
+    global.MediaRecorder = MockMediaRecorder as unknown as typeof MediaRecorder;
   });
 
   afterAll(() => {
@@ -81,7 +81,7 @@ describe('BrowserMediaRecorder Adapter', () => {
         return type === 'audio/webm';
       });
 
-      const recorder = new BrowserMediaRecorder();
+      new BrowserMediaRecorder();
       expect(MockMediaRecorder.isTypeSupported).toHaveBeenCalledWith('audio/webm;codecs=opus');
       expect(MockMediaRecorder.isTypeSupported).toHaveBeenCalledWith('audio/webm');
     });
@@ -145,10 +145,11 @@ describe('BrowserMediaRecorder Adapter', () => {
       
       try {
         await recorder.startRecording();
-      } catch (err: any) {
-        expect(err.dto.code).toBe('PERMISSION_DENIED');
-        expect(err.dto.message).toContain('Microphone access was denied or unavailable');
-        expect(err.dto.details).toBe(accessError);
+      } catch (err) {
+        const captureError = err as CaptureError;
+        expect(captureError.dto.code).toBe('PERMISSION_DENIED');
+        expect(captureError.dto.message).toContain('Microphone access was denied or unavailable');
+        expect(captureError.dto.details).toBe(accessError);
       }
     });
 
@@ -159,9 +160,10 @@ describe('BrowserMediaRecorder Adapter', () => {
       await expect(recorder.startRecording()).rejects.toThrow(CaptureError);
       try {
         await recorder.startRecording();
-      } catch (err: any) {
-        expect(err.dto.code).toBe('RECORDING_FAILED');
-        expect(err.dto.message).toBe('Recording is already in progress');
+      } catch (err) {
+        const captureError = err as CaptureError;
+        expect(captureError.dto.code).toBe('RECORDING_FAILED');
+        expect(captureError.dto.message).toBe('Recording is already in progress');
       }
     });
   });
@@ -184,9 +186,10 @@ describe('BrowserMediaRecorder Adapter', () => {
 
       try {
         await recorder.stopRecording();
-      } catch (err: any) {
-        expect(err.dto.code).toBe('RECORDING_FAILED');
-        expect(err.dto.message).toBe('No active recording to stop');
+      } catch (err) {
+        const captureError = err as CaptureError;
+        expect(captureError.dto.code).toBe('RECORDING_FAILED');
+        expect(captureError.dto.message).toBe('No active recording to stop');
       }
     });
   });
