@@ -1,5 +1,5 @@
 import { IAudioRecorder } from '../IAudioRecorder';
-import { CaptureError } from '../CaptureError';
+import { CaptureError } from './FakeAudioModelBootstrap';
 import { PermissionsDTO } from '../types';
 
 /**
