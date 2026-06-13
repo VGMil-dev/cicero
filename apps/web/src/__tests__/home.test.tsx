@@ -2,14 +2,13 @@ import { render, screen } from "@testing-library/react";
 import Home from "../app/page";
 
 describe("Home Page", () => {
-  it("renders the Next.js logo", () => {
+  it("renders the Cicero title", () => {
     render(<Home />);
-    const logo = screen.getByAltText("Next.js logo");
-    expect(logo).toBeInTheDocument();
+    expect(screen.getByText(/Cicero/i)).toBeInTheDocument();
   });
 
-  it("renders the getting started text", () => {
+  it("renders the mock simulator header", () => {
     render(<Home />);
-    expect(screen.getByText(/To get started, edit the page.tsx file/i)).toBeInTheDocument();
+    expect(screen.getByText(/Simulador de Mocks/i)).toBeInTheDocument();
   });
 });
