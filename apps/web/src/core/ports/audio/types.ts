@@ -10,15 +10,43 @@
 export type AudioCaptureState = 'idle' | 'loading-model' | 'ready' | 'recording' | 'error';
 
 /**
+ * Detailed stages and statuses for the model loading/initialization progress.
+ * 
+ * - `downloading`: The model weights/files are being downloaded from the network.
+ * - `extracting`: Files are being extracted/uncompressed.
+ * - `loading`: The model is being loaded into memory/WASM execution context.
+ * - `ready`: Model is fully loaded and confirmed.
+ * - `panic`: A fatal execution error or WASM panic occurred.
+ */
+export type ProgressStatus = 'downloading' | 'extracting' | 'loading' | 'ready' | 'panic';
+
+/**
  * Data Transfer Object representing the loading progress of the AI model.
+ * Structured to report detailed model initialization stages, panics, and confirmation.
+ * 
+ * @example
+ * ```typescript
+ * const progress: ProgressDTO = {
+ *   status: 'downloading',
+ *   progress: 45,
+ *   stage: 'downloading model weights',
+ *   estimatedTimeRemaining: 12000
+ * };
+ * ```
  */
 export interface ProgressDTO {
+  /** The high-level status of the initialization flow, {@link ProgressStatus} */
+  status: ProgressStatus;
   /** Percentage of completion from 0 to 100 */
   progress: number;
-  /** Current stage description (e.g., 'downloading', 'extracting', 'loading') */
+  /** Current detailed stage description (e.g., 'fetching shards', 'compiling WASM') */
   stage: string;
   /** Estimated time to completion in milliseconds, if available */
   estimatedTimeRemaining?: number;
+  /** Detailed message about the current status */
+  message?: string;
+  /** Error information if status is 'panic', {@link ErrorDTO} */
+  error?: ErrorDTO;
 }
 
 /**
@@ -31,20 +59,84 @@ export interface PermissionsDTO {
 
 /**
  * Standard error codes for the capture slice.
+ * 
+ * - `PERMISSION_DENIED`: Microphone access was rejected by the user.
+ * - `MODEL_LOAD_FAILED`: Model files could not be downloaded or prepared.
+ * - `RECORDING_FAILED`: Hardware capture failed during recording.
+ * - `WASM_PANIC`: A fatal error or panic occurred within the WASM execution context.
+ * - `UNKNOWN`: Unrecognized or unclassified error.
  */
-export type ErrorCode = 'PERMISSION_DENIED' | 'MODEL_LOAD_FAILED' | 'RECORDING_FAILED' | 'UNKNOWN';
+export type ErrorCode = 'PERMISSION_DENIED' | 'MODEL_LOAD_FAILED' | 'RECORDING_FAILED' | 'WASM_PANIC' | 'UNKNOWN';
 
 /**
  * Data Transfer Object for error reporting in the audio flow.
+ * Preserves the stack trace (e.g., WASM panics, runtime stack) to aid debugging.
+ * 
+ * @example
+ * ```typescript
+ * const error: ErrorDTO = {
+ *   code: 'WASM_PANIC',
+ *   message: 'unreachable executed',
+ *   stack: 'wasm-function[302]:0x1a2b\nwasm-function[102]:0x3c4d'
+ * };
+ * ```
  */
 export interface ErrorDTO {
-  /** Machine-readable error code */
+  /** Machine-readable error code, {@link ErrorCode} */
   code: ErrorCode;
   /** Human-readable error message */
   message: string;
-  /** Optional technical details or stack traces */
+  /** Optional technical details or structured payloads */
   details?: unknown;
+  /** Preserved stack trace from JS or WASM to facilitate debugging */
+  stack?: string;
 }
+
+/**
+ * Discriminated union of messages sent from the Main Thread to the Web Worker.
+ */
+export type MainThreadMessageDTO =
+  | {
+      /** Action to start the model download and loading process */
+      type: 'LOAD_MODEL';
+      /** Optional settings to specify model name or quantization */
+      payload?: {
+        /** The model identifier to load (e.g. 'onnx-community/CrisperWhisper-ONNX') */
+        modelName?: string;
+        /** Flag to enforce quantized precision (e.g. q8/q4) to prevent out of memory issues */
+        quantized?: boolean;
+      };
+    }
+  | {
+      /** Action to terminate the Web Worker and release its resources */
+      type: 'TERMINATE';
+      /** No payload required for termination */
+      payload?: null;
+    };
+
+/**
+ * Discriminated union of messages sent from the Web Worker to the Main Thread.
+ */
+export type WorkerMessageDTO =
+  | {
+      /** Indicates a progress update during model initialization */
+      type: 'PROGRESS';
+      /** The detailed progress payload, {@link ProgressDTO} */
+      payload: ProgressDTO;
+    }
+  | {
+      /** Indicates that the model is loaded successfully and ready for use */
+      type: 'READY';
+      /** No payload required for confirmation */
+      payload?: null;
+    }
+  | {
+      /** Indicates that a loading failure or runtime WASM panic occurred */
+      type: 'ERROR';
+      /** The detailed error payload, {@link ErrorDTO} */
+      payload: ErrorDTO;
+    };
+
 
 /**
  * Data Transfer Object representing a single word chunk with timing metadata

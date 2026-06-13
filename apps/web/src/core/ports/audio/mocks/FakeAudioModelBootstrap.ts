@@ -1,5 +1,5 @@
 import { IAudioModelBootstrap } from '../IAudioModelBootstrap';
-import { AudioCaptureState, ErrorCode, ErrorDTO, ProgressDTO } from '../types';
+import { AudioCaptureState, ErrorCode, ErrorDTO, ProgressDTO, ProgressStatus } from '../types';
 
 /**
  * Error thrown by audio capture mocks.
@@ -151,6 +151,7 @@ export class FakeAudioModelBootstrap implements IAudioModelBootstrap {
 
   private emitProgress(current: ProgressStage): void {
     const dto: ProgressDTO = {
+      status: current.stage as ProgressStatus,
       progress: current.progress,
       stage: current.stage,
     };
