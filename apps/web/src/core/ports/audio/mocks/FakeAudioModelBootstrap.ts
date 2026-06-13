@@ -130,6 +130,23 @@ export class FakeAudioModelBootstrap implements IAudioModelBootstrap {
     return this.state;
   }
 
+  /**
+   * Safe termination of the simulated initialization process.
+   * Clears the active timer and resets state to 'idle'.
+   */
+  terminate(): void {
+    this.clearTimer();
+    this.state = 'idle';
+  }
+
+  /**
+   * Returns the active Web Worker instance (always null for Fake/Mock implementation).
+   */
+  getWorkerInstance(): Worker | null {
+    return null;
+  }
+
+
   private emitProgress(current: ProgressStage): void {
     const dto: ProgressDTO = {
       status: current.stage as ProgressStatus,

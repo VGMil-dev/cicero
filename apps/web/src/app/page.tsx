@@ -8,13 +8,14 @@ import { useAudioCapture } from '../hooks/useAudioCapture';
 
 export default function Home() {
   // Mode configuration: real or mock implementation
-  const [useRealImplementation, setUseRealImplementation] = useState(true);
-
-  // Mock configuration options
-  const [shouldFailModel, setShouldFailModel] = useState(false);
-  const [grantPermission, setGrantPermission] = useState(true);
-  const [shouldFailOnStart, setShouldFailOnStart] = useState(false);
-  const progressInterval = 400; // 400ms for quick but visible progress
+  // By default, we use the real implementation for the MVP.
+  // Fallback to mocks can be activated by setting 'use_mocks' to 'true' in localStorage.
+  const [useRealImplementation] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('use_mocks') !== 'true';
+    }
+    return true;
+  });
 
   // Re-instantiate based on mode (Real or Mock)
   const bootstrap = useMemo(() => {
@@ -22,20 +23,20 @@ export default function Home() {
       return new WorkerAudioModelBootstrap({ quantized: true });
     }
     return new FakeAudioModelBootstrap({
-      shouldFail: shouldFailModel,
-      progressInterval: progressInterval,
+      shouldFail: false,
+      progressInterval: 400,
     });
-  }, [useRealImplementation, shouldFailModel]);
+  }, [useRealImplementation]);
 
   const recorder = useMemo(() => {
     if (useRealImplementation) {
       return new BrowserMediaRecorder();
     }
     return new FakeAudioRecorder({
-      grantPermission: grantPermission,
-      shouldFailOnStart: shouldFailOnStart,
+      grantPermission: true,
+      shouldFailOnStart: false,
     });
-  }, [useRealImplementation, grantPermission, shouldFailOnStart]);
+  }, [useRealImplementation]);
 
   // Hook orchestration
   const {
@@ -48,6 +49,7 @@ export default function Home() {
     stopRecording,
     cancelRecording,
     reset,
+    terminateWorker,
   } = useAudioCapture(bootstrap, recorder);
 
   // Auto-start model loading on mount or when bootstrap changes
@@ -55,31 +57,12 @@ export default function Home() {
     initializeModel();
   }, [initializeModel]);
 
-  // Limpieza del Web Worker al desmontar o cambiar la implementación
+  // Limpieza del Web Worker al desmontar
   useEffect(() => {
     return () => {
-      if (bootstrap instanceof WorkerAudioModelBootstrap) {
-        bootstrap.terminate();
-      }
+      bootstrap.terminate();
     };
   }, [bootstrap]);
-
-  // Escuchar pánicos del Web Worker a nivel de UI para diagnóstico
-  useEffect(() => {
-    if (!(bootstrap instanceof WorkerAudioModelBootstrap)) return;
-
-    const worker = bootstrap.getWorkerInstance();
-    if (!worker) return;
-
-    const handleFatalError = (e: ErrorEvent) => {
-      console.error("Crash fatal capturado en UI desde Web Worker:", e);
-    };
-
-    worker.addEventListener('error', handleFatalError);
-    return () => {
-      worker.removeEventListener('error', handleFatalError);
-    };
-  }, [bootstrap, state]);
 
   // Recording timer
   const [recordingTime, setRecordingTime] = useState(0);
@@ -145,13 +128,13 @@ export default function Home() {
   return (
     <main className="flex-1 w-full min-h-screen bg-[#f5f4f0] p-6 md:p-12 font-body relative overflow-x-hidden bg-[radial-gradient(#d4d4d4_1px,transparent_1px)] [background-size:24px_24px]">
       {/* Decorative Pencil Line Header */}
-      <header className="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-4 border-black pb-6">
+      <header className="max-w-3xl mx-auto mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-4 border-black pb-6">
         <div>
           <h1 className="font-headline font-extrabold text-4xl md:text-5xl uppercase tracking-tight text-black flex items-center gap-3">
-            🎙️ Cicero <span className="bg-neon-green text-black border-2 border-black text-xs px-2 py-1 font-body normal-case font-bold rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">MOCK PLAYGROUND</span>
+            🎙️ Cicero <span className="bg-neon-green text-black border-2 border-black text-xs px-2 py-1 font-body normal-case font-bold rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">MVP</span>
           </h1>
           <p className="text-stone-600 mt-2 text-lg font-medium">
-            Entorno de prueba interactivo para la Carga del Modelo de IA y Grabación local.
+            Carga de Modelo de Voz local en segundo plano y captura privada de audio.
           </p>
         </div>
         <div className="flex gap-2">
@@ -161,9 +144,9 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Side: Main Interactive Workspace (8 Cols) */}
-        <section className="lg:col-span-8 bg-white border-4 border-black rounded-[2rem] p-8 md:p-12 relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+      <div className="max-w-3xl mx-auto">
+        {/* Main Interactive Workspace */}
+        <section className="w-full bg-white border-4 border-black rounded-[2rem] p-8 md:p-12 relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
           {/* Notebook Spiral Decoration */}
           <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-around py-6 bg-stone-100 border-r-4 border-black select-none">
             {Array.from({ length: 14 }).map((_, i) => (
@@ -196,7 +179,7 @@ export default function Home() {
               </div>
               <button
                 onClick={reset}
-                className="px-3 py-1.5 border-2 border-black rounded-lg bg-stone-100 hover:bg-stone-200 font-bold text-xs uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1.5"
+                className="px-3 py-1.5 border-2 border-black rounded-lg bg-stone-100 hover:bg-stone-200 font-bold text-xs uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Reiniciar flujo"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -228,11 +211,11 @@ export default function Home() {
                     </div>
                     <h3 className="font-headline font-bold text-2xl mb-2">Punto de Partida</h3>
                     <p className="text-stone-600 mb-6 text-sm">
-                      El componente de grabación está montado pero el modelo aún no se ha inicializado en segundo plano.
+                      El componente de grabación está listo pero el modelo aún no se ha inicializado en segundo plano.
                     </p>
                     <button
                       onClick={initializeModel}
-                      className="px-6 py-3 bg-neon-green text-black font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-sm"
+                      className="px-6 py-3 bg-neon-green text-black font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-sm cursor-pointer"
                     >
                       🚀 Inicializar Modelo
                     </button>
@@ -253,7 +236,7 @@ export default function Home() {
                     {/* Progress Bar (Chunky Neo-Brutalist) */}
                     <div className="w-full h-8 bg-white border-3 border-black rounded-xl overflow-hidden relative shadow-[4px_4px_0px_rgba(0,0,0,1)]">
                       <div
-                        className="h-full bg-neon-green border-r-3 border-black transition-all duration-300"
+                        className="h-full bg-neon-green border-r-3 border-black transition-all duration-300 animate-stripes"
                         style={{ width: `${progress?.progress || 0}%` }}
                       />
                       <span className="absolute inset-0 flex items-center justify-center font-headline font-extrabold text-sm text-black">
@@ -261,8 +244,8 @@ export default function Home() {
                       </span>
                     </div>
                     
-                    <p className="text-stone-500 mt-4 text-xs">
-                      Descargando CrisperWhisper-ONNX en IndexedDB y montando Web Worker...
+                    <p className="text-stone-600 mt-4 text-xs font-semibold italic max-w-sm mx-auto">
+                      {progress?.message || 'Descargando archivos del modelo en IndexedDB y montando Web Worker...'}
                     </p>
                   </div>
                 )}
@@ -349,7 +332,7 @@ export default function Home() {
 
                 {/* 5. STATE: ERROR */}
                 {state === 'error' && (
-                  <div className="max-w-md">
+                  <div className="max-w-md w-full">
                     <div className="w-16 h-16 mx-auto mb-4 bg-rose-200 border-2 border-black rounded-full flex items-center justify-center shadow-[3px_3px_0px_rgba(0,0,0,1)] text-red-700">
                       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -367,12 +350,20 @@ export default function Home() {
                       </p>
                     </div>
 
-                    <button
-                      onClick={initializeModel}
-                      className="px-6 py-3 bg-stone-900 text-white font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-xs"
-                    >
-                      🔄 Reintentar Inicialización
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <button
+                        onClick={initializeModel}
+                        className="px-5 py-3 bg-stone-900 text-white font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        🔄 Reintentar
+                      </button>
+                      <button
+                        onClick={terminateWorker}
+                        className="px-5 py-3 bg-red-400 text-black font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        🚨 IA Reset
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -382,7 +373,7 @@ export default function Home() {
             {/* Simulated Output / Result Preview */}
             {audioBlob && (
               <div className="mt-8 border-3 border-black rounded-2xl p-6 bg-purple-50 relative shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-                <div className="absolute top-2 right-4 text-xs font-bold text-purple-400 rotate-3">MOCK RESULT</div>
+                <div className="absolute top-2 right-4 text-xs font-bold text-purple-400 rotate-3">REAL RESULT</div>
                 <h4 className="font-headline font-bold text-lg mb-3 flex items-center gap-2">
                   <span>📦</span> Audio Grabado con Éxito
                 </h4>
@@ -430,140 +421,6 @@ export default function Home() {
             )}
           </div>
         </section>
-
-        {/* Right Side: Mock Simulator Control Panel (4 Cols) */}
-        <aside className="lg:col-span-4 flex flex-col gap-6">
-          {/* post-it notebook card */}
-          <div className="bg-[#fffbeb] border-4 border-black rounded-[1.5rem] p-6 relative shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rotate-[-1deg]">
-            {/* Red header strip */}
-            <div className="absolute top-0 left-0 right-0 h-4 bg-amber-200 border-b-4 border-black rounded-t-[1.1rem]" />
-            
-            <h2 className="font-headline font-extrabold text-xl mb-4 text-black flex items-center gap-2 mt-2">
-              ⚙️ Simulador de Mocks
-            </h2>
-            <p className="text-stone-700 text-xs mb-6 font-medium">
-              Ajusta los interruptores para probar cómo reacciona la UI en los diferentes casos de éxito y de error técnico.
-            </p>
-
-            <div className="space-y-5">
-              {/* Option 0: Real vs Mock Mode */}
-              <div className="border-2 border-black p-3 bg-white rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                <span className="block font-headline font-bold text-xs uppercase text-stone-500 mb-2">
-                  🛠️ Modo de Ejecución
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setUseRealImplementation(true); reset(); }}
-                    className={`flex-1 py-1.5 text-xs font-extrabold border-2 border-black rounded-md transition-all uppercase
-                      ${useRealImplementation ? 'bg-neon-green text-black translate-y-[1px] shadow-[1px_1px_0px_rgba(0,0,0,1)]' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 shadow-[3px_3px_0px_rgba(0,0,0,1)]'}
-                    `}
-                  >
-                    Real
-                  </button>
-                  <button
-                    onClick={() => { setUseRealImplementation(false); reset(); }}
-                    className={`flex-1 py-1.5 text-xs font-extrabold border-2 border-black rounded-md transition-all uppercase
-                      ${!useRealImplementation ? 'bg-neon-green text-black translate-y-[1px] shadow-[1px_1px_0px_rgba(0,0,0,1)]' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 shadow-[3px_3px_0px_rgba(0,0,0,1)]'}
-                    `}
-                  >
-                    Mock
-                  </button>
-                </div>
-              </div>
-
-              {/* Option 1: Model Load result */}
-              <div className={`border-2 border-black p-3 bg-white rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-200 ${useRealImplementation ? 'opacity-40 pointer-events-none' : ''}`}>
-                <span className="block font-headline font-bold text-xs uppercase text-stone-500 mb-2">
-                  1. Carga de Modelo de IA (Mock)
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setShouldFailModel(false); reset(); }}
-                    className={`flex-1 py-1.5 text-xs font-extrabold border-2 border-black rounded-md transition-all uppercase
-                      ${!shouldFailModel ? 'bg-neon-green text-black translate-y-[1px] shadow-[1px_1px_0px_rgba(0,0,0,1)]' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 shadow-[3px_3px_0px_rgba(0,0,0,1)]'}
-                    `}
-                  >
-                    Carga Exitosa
-                  </button>
-                  <button
-                    onClick={() => { setShouldFailModel(true); reset(); }}
-                    className={`flex-1 py-1.5 text-xs font-extrabold border-2 border-black rounded-md transition-all uppercase
-                      ${shouldFailModel ? 'bg-red-400 text-white translate-y-[1px] shadow-[1px_1px_0px_rgba(0,0,0,1)]' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 shadow-[3px_3px_0px_rgba(0,0,0,1)]'}
-                    `}
-                  >
-                    Simular Fallo
-                  </button>
-                </div>
-              </div>
-
-              {/* Option 2: Mic permissions (Mock) */}
-              <div className={`border-2 border-black p-3 bg-white rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-200 ${useRealImplementation ? 'opacity-40 pointer-events-none' : ''}`}>
-                <span className="block font-headline font-bold text-xs uppercase text-stone-500 mb-2">
-                  2. Permisos de Micrófono (Mock)
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setGrantPermission(true); reset(); }}
-                    className={`flex-1 py-1.5 text-xs font-extrabold border-2 border-black rounded-md transition-all uppercase
-                      ${grantPermission ? 'bg-neon-green text-black translate-y-[1px] shadow-[1px_1px_0px_rgba(0,0,0,1)]' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 shadow-[3px_3px_0px_rgba(0,0,0,1)]'}
-                    `}
-                  >
-                    Concedidos
-                  </button>
-                  <button
-                    onClick={() => { setGrantPermission(false); reset(); }}
-                    className={`flex-1 py-1.5 text-xs font-extrabold border-2 border-black rounded-md transition-all uppercase
-                      ${!grantPermission ? 'bg-red-400 text-white translate-y-[1px] shadow-[1px_1px_0px_rgba(0,0,0,1)]' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 shadow-[3px_3px_0px_rgba(0,0,0,1)]'}
-                    `}
-                  >
-                    Denegados
-                  </button>
-                </div>
-              </div>
-
-              {/* Option 3: Recording Failure (Mock) */}
-              <div className={`border-2 border-black p-3 bg-white rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-200 ${useRealImplementation ? 'opacity-40 pointer-events-none' : ''}`}>
-                <span className="block font-headline font-bold text-xs uppercase text-stone-500 mb-2">
-                  3. Error al Iniciar Grabación (Mock)
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setShouldFailOnStart(false); reset(); }}
-                    className={`flex-1 py-1.5 text-xs font-extrabold border-2 border-black rounded-md transition-all uppercase
-                      ${!shouldFailOnStart ? 'bg-neon-green text-black translate-y-[1px] shadow-[1px_1px_0px_rgba(0,0,0,1)]' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 shadow-[3px_3px_0px_rgba(0,0,0,1)]'}
-                    `}
-                  >
-                    Sin Errores
-                  </button>
-                  <button
-                    onClick={() => { setShouldFailOnStart(true); reset(); }}
-                    className={`flex-1 py-1.5 text-xs font-extrabold border-2 border-black rounded-md transition-all uppercase
-                      ${shouldFailOnStart ? 'bg-red-400 text-white translate-y-[1px] shadow-[1px_1px_0px_rgba(0,0,0,1)]' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 shadow-[3px_3px_0px_rgba(0,0,0,1)]'}
-                    `}
-                  >
-                    Simular Error
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 border-t-2 border-black border-dashed pt-4">
-              <p className="text-stone-500 text-[10px] leading-tight">
-                * Nota: Cambiar cualquier ajuste reiniciará la máquina de estados a `idle` y activará la carga con los nuevos mocks de prueba configurados.
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Guide Post-it */}
-          <div className="bg-[#e0f2fe] border-4 border-black rounded-[1.5rem] p-6 relative shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rotate-[1.5deg]">
-            <h3 className="font-headline font-extrabold text-lg mb-2 text-black">💡 Guía Rápida</h3>
-            <ul className="text-xs text-stone-800 space-y-2 list-disc list-inside font-semibold">
-              <li>El modelo tarda aproximadamente 2 segundos en cargar por defecto (simulado).</li>
-              <li>Puedes detener la grabación en cualquier momento para obtener el Blob del audio.</li>
-              <li>Simula un fallo en la carga del modelo para verificar la pantalla de recuperación y reintento de la UI.</li>
-            </ul>
-          </div>
-        </aside>
       </div>
     </main>
   );

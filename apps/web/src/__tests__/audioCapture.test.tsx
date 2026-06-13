@@ -116,4 +116,30 @@ describe('useAudioCapture Hook', () => {
     expect(result.current.state).toBe('error');
     expect(result.current.error?.code).toBe('RECORDING_FAILED');
   });
+
+  it('should call bootstrap.terminate and reset state to idle when calling terminateWorker', () => {
+    const bootstrap = new FakeAudioModelBootstrap({ progressInterval: 10 });
+    const recorder = new FakeAudioRecorder();
+    const { result } = renderHook(() => useAudioCapture(bootstrap, recorder));
+
+    let initPromise: Promise<void>;
+    act(() => {
+      initPromise = result.current.initializeModel();
+    });
+
+    expect(result.current.state).toBe('loading-model');
+
+    const terminateSpy = jest.spyOn(bootstrap, 'terminate');
+
+    act(() => {
+      result.current.terminateWorker();
+    });
+
+    expect(terminateSpy).toHaveBeenCalled();
+    expect(result.current.state).toBe('idle');
+    expect(result.current.progress).toBeNull();
+    expect(result.current.error).toBeNull();
+    expect(result.current.audioBlob).toBeNull();
+  });
 });
+

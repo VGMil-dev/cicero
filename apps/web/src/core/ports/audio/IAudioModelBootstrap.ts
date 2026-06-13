@@ -33,4 +33,31 @@ export interface IAudioModelBootstrap {
    * @returns The current {@link AudioCaptureState}.
    */
   getState(): AudioCaptureState;
+
+  /**
+   * Safe termination of the initialization process or Web Worker,
+   * releasing loaded resources and memory.
+   * 
+   * @example
+   * ```typescript
+   * bootstrap.terminate();
+   * ```
+   */
+  terminate(): void;
+
+  /**
+   * Returns the active Web Worker instance if initialized, or null.
+   * Useful for hooking direct worker events (like global errors/onerror).
+   * 
+   * @returns The active {@link Worker} instance, or null.
+   * @example
+   * ```typescript
+   * const worker = bootstrap.getWorkerInstance();
+   * if (worker) {
+   *   worker.onerror = (e) => console.error(e);
+   * }
+   * ```
+   */
+  getWorkerInstance?(): Worker | null;
 }
+
