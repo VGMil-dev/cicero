@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
+import "../config/env";
+
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
