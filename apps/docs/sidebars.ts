@@ -21,11 +21,15 @@ const sidebars: SidebarsConfig = {
       items: [
         'arquitectura/index',
         'arquitectura/monorepo',
+        'arquitectura/configuracion',
         'arquitectura/contenedores',
         'arquitectura/componentes',
         'arquitectura/secuencia',
         'arquitectura/casos-de-uso',
         'arquitectura/decisiones',
+        'arquitectura/contratos-captura',
+        'arquitectura/mocks-captura',
+        'arquitectura/persistencia-sesion',
       ],
     },
     {
