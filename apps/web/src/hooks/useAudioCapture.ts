@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { IAudioModelBootstrap } from '../core/ports/audio/IAudioModelBootstrap';
 import { IAudioRecorder } from '../core/ports/audio/IAudioRecorder';
 import { AudioCaptureState, ErrorDTO, ProgressDTO, ErrorCode } from '../core/ports/audio/types';
@@ -17,6 +17,29 @@ export function useAudioCapture(
   const [error, setError] = useState<ErrorDTO | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
+  // Monitor worker error/panic events directly
+  useEffect(() => {
+    if (typeof bootstrap.getWorkerInstance !== 'function') return;
+
+    const worker = bootstrap.getWorkerInstance();
+    if (!worker) return;
+
+    const handlePanic = (e: ErrorEvent) => {
+      console.error('Fallo crítico del Web Worker detectado en useAudioCapture:', e);
+      setState('error');
+      setError({
+        code: 'WASM_PANIC',
+        message: `Fallo crítico de ejecución en el Web Worker: ${e.message || 'Error desconocido'}`,
+        details: e,
+      });
+    };
+
+    worker.addEventListener('error', handlePanic);
+    return () => {
+      worker.removeEventListener('error', handlePanic);
+    };
+  }, [bootstrap, state]);
+
   const initializeModel = useCallback(async () => {
     setState('loading-model');
     setError(null);
@@ -25,6 +48,12 @@ export function useAudioCapture(
     try {
       bootstrap.onProgress((p) => {
         setProgress(p);
+        if (p.status === 'panic') {
+          setState('error');
+          if (p.error) {
+            setError(p.error);
+          }
+        }
       });
 
       await bootstrap.initialize();
@@ -140,11 +169,20 @@ export function useAudioCapture(
   }, [recorder]);
 
   const reset = useCallback(() => {
+    bootstrap.terminate();
     setState('idle');
     setProgress(null);
     setError(null);
     setAudioBlob(null);
-  }, []);
+  }, [bootstrap]);
+
+  const terminateWorker = useCallback(() => {
+    bootstrap.terminate();
+    setState('idle');
+    setProgress(null);
+    setError(null);
+    setAudioBlob(null);
+  }, [bootstrap]);
 
   return {
     state,
@@ -156,5 +194,7 @@ export function useAudioCapture(
     stopRecording,
     cancelRecording,
     reset,
+    terminateWorker,
   };
 }
+
