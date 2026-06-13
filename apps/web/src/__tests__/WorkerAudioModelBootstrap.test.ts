@@ -2,12 +2,23 @@ import { WorkerAudioModelBootstrap } from '../core/adapters/audio/WorkerAudioMod
 import { CaptureError } from '../core/ports/audio/CaptureError';
 import { ProgressDTO } from '../core/ports/audio/types';
 
+interface MockWorkerInstance {
+  onmessage: ((event: { data: unknown }) => void) | null;
+  onerror: ((error: ErrorEvent) => void) | null;
+  postMessage: jest.Mock;
+  terminate: jest.Mock;
+}
+
+interface MockWorkerConstructor {
+  instances: MockWorkerInstance[];
+}
+
 describe('WorkerAudioModelBootstrap Adapter', () => {
-  let MockWorkerClass: any;
+  let MockWorkerClass: MockWorkerConstructor;
 
   beforeEach(() => {
     // Limpiar las instancias creadas en el mock global
-    MockWorkerClass = (global as any).MockWorker;
+    MockWorkerClass = (global as unknown as { MockWorker: MockWorkerConstructor }).MockWorker;
     MockWorkerClass.instances = [];
     jest.clearAllMocks();
   });
@@ -46,9 +57,11 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
       });
 
       // Simular READY desde el Worker
-      workerInstance.onmessage({
-        data: { type: 'READY' },
-      });
+      if (workerInstance.onmessage) {
+        workerInstance.onmessage({
+          data: { type: 'READY' },
+        });
+      }
 
       await expect(initPromise).resolves.toBeUndefined();
       expect(bootstrap.getState()).toBe('ready');
@@ -63,9 +76,11 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
       expect(MockWorkerClass.instances.length).toBe(1);
 
       const workerInstance = MockWorkerClass.instances[0];
-      workerInstance.onmessage({
-        data: { type: 'READY' },
-      });
+      if (workerInstance.onmessage) {
+        workerInstance.onmessage({
+          data: { type: 'READY' },
+        });
+      }
 
       await Promise.all([initPromise1, initPromise2]);
       expect(bootstrap.getState()).toBe('ready');
@@ -89,12 +104,14 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
       };
 
       // Simular PROGRESS desde el Worker
-      workerInstance.onmessage({
-        data: {
-          type: 'PROGRESS',
-          payload: mockProgressPayload,
-        },
-      });
+      if (workerInstance.onmessage) {
+        workerInstance.onmessage({
+          data: {
+            type: 'PROGRESS',
+            payload: mockProgressPayload,
+          },
+        });
+      }
 
       expect(progressSpy).toHaveBeenCalledWith(mockProgressPayload);
     });
@@ -108,24 +125,27 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
       const workerInstance = MockWorkerClass.instances[0];
 
       // Simular ERROR desde el Worker
-      workerInstance.onmessage({
-        data: {
-          type: 'ERROR',
-          payload: {
-            code: 'MODEL_LOAD_FAILED',
-            message: 'Disk quota exceeded',
-            details: { quota: 200 },
+      if (workerInstance.onmessage) {
+        workerInstance.onmessage({
+          data: {
+            type: 'ERROR',
+            payload: {
+              code: 'MODEL_LOAD_FAILED',
+              message: 'Disk quota exceeded',
+              details: { quota: 200 },
+            },
           },
-        },
-      });
+        });
+      }
 
       await expect(initPromise).rejects.toThrow(CaptureError);
       
       try {
         await initPromise;
-      } catch (err: any) {
-        expect(err.dto.code).toBe('MODEL_LOAD_FAILED');
-        expect(err.dto.message).toBe('Disk quota exceeded');
+      } catch (err) {
+        const captureError = err as CaptureError;
+        expect(captureError.dto.code).toBe('MODEL_LOAD_FAILED');
+        expect(captureError.dto.message).toBe('Disk quota exceeded');
         expect(bootstrap.getState()).toBe('error');
       }
     });
@@ -147,16 +167,17 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
       };
       
       if (workerInstance.onerror) {
-        workerInstance.onerror(errorEvent as any);
+        workerInstance.onerror(errorEvent as unknown as ErrorEvent);
       }
 
       await expect(initPromise).rejects.toThrow(CaptureError);
 
       try {
         await initPromise;
-      } catch (err: any) {
-        expect(err.dto.code).toBe('WASM_PANIC');
-        expect(err.dto.message).toContain('Fallo crítico de ejecución en el Web Worker: WASM out of bounds memory access');
+      } catch (err) {
+        const captureError = err as CaptureError;
+        expect(captureError.dto.code).toBe('WASM_PANIC');
+        expect(captureError.dto.message).toContain('Fallo crítico de ejecución en el Web Worker: WASM out of bounds memory access');
         expect(bootstrap.getState()).toBe('error');
       }
 

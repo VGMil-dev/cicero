@@ -106,11 +106,12 @@ export class WorkerAudioModelBootstrap implements IAudioModelBootstrap {
           },
         };
         this.worker.postMessage(loadMessage);
-      } catch (err: any) {
+      } catch (err) {
         this.state = 'error';
+        const errorObj = err instanceof Error ? err : new Error(String(err));
         const captureError = new CaptureError(
           'MODEL_LOAD_FAILED',
-          `Fallo al instanciar el Web Worker en Next.js: ${err.message || err}`,
+          `Fallo al instanciar el Web Worker en Next.js: ${errorObj.message}`,
           err
         );
         reject(captureError);
@@ -143,7 +144,7 @@ export class WorkerAudioModelBootstrap implements IAudioModelBootstrap {
     if (this.worker) {
       try {
         this.worker.postMessage({ type: 'TERMINATE' });
-      } catch (e) {
+      } catch {
         // Ignorar si el canal ya estaba cerrado
       }
       this.worker.terminate();

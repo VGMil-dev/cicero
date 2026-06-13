@@ -58,8 +58,8 @@ export default function Home() {
   // Limpieza del Web Worker al desmontar o cambiar la implementación
   useEffect(() => {
     return () => {
-      if (bootstrap && 'terminate' in bootstrap) {
-        (bootstrap as any).terminate();
+      if (bootstrap instanceof WorkerAudioModelBootstrap) {
+        bootstrap.terminate();
       }
     };
   }, [bootstrap]);

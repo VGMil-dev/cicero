@@ -5,7 +5,7 @@ import { MainThreadMessageDTO, WorkerMessageDTO } from '../../ports/audio/types'
 env.allowLocalModels = false;
 
 // Variables globales para el patrón Singleton del modelo
-let pipelineInstance: any = null;
+let pipelineInstance: unknown = null;
 let currentModelName: string | null = null;
 let currentDtype: string | null = null;
 
@@ -32,6 +32,12 @@ async function checkStorageQuota(requiredBytes: number = 150 * 1024 * 1024): Pro
   }
 }
 
+interface ProgressData {
+  status: string;
+  progress?: number;
+  file?: string;
+}
+
 /**
  * Inicializa y descarga el modelo utilizando Transformers.js/ONNX Runtime.
  * Maneja el patrón Singleton, progreso y fallbacks.
@@ -45,7 +51,7 @@ async function loadModel(modelName: string, dtype: string): Promise<void> {
     await checkStorageQuota(150 * 1024 * 1024);
 
     // Callback para monitorear el progreso de descarga de los shards del modelo
-    const progressCallback = (data: any) => {
+    const progressCallback = (data: ProgressData) => {
       if (data.status === 'progress' || data.status === 'downloading') {
         const progressValue = typeof data.progress === 'number' ? Math.round(data.progress) : 0;
         const progressMessage: WorkerMessageDTO = {
@@ -86,7 +92,7 @@ async function loadModel(modelName: string, dtype: string): Promise<void> {
 
     pipelineInstance = await pipeline('automatic-speech-recognition', modelName, {
       device: 'webgpu',
-      dtype: dtype as any,
+      dtype: dtype as 'q8' | 'fp32',
       progress_callback: progressCallback,
     });
 
@@ -95,24 +101,25 @@ async function loadModel(modelName: string, dtype: string): Promise<void> {
 
     // Confirmar que el modelo está cargado con WebGPU
     self.postMessage({ type: 'READY' });
-  } catch (webgpuError: any) {
+  } catch (webgpuError: unknown) {
+    const errorDetails = webgpuError instanceof Error ? webgpuError.message : String(webgpuError);
     // 3. Fallback automático a CPU (WASM) si falla WebGPU
-    const progressMessage: WorkerMessageDTO = {
+    const fallbackProgressMessage: WorkerMessageDTO = {
       type: 'PROGRESS',
       payload: {
         status: 'loading',
         progress: 30,
         stage: 'loading',
-        message: `WebGPU no disponible o falló: ${webgpuError.message || webgpuError}. Activando fallback a CPU (WASM)...`
+        message: `WebGPU no disponible o falló: ${errorDetails}. Activando fallback a CPU (WASM)...`
       }
     };
-    self.postMessage(progressMessage);
+    self.postMessage(fallbackProgressMessage);
 
     try {
       pipelineInstance = await pipeline('automatic-speech-recognition', modelName, {
         device: 'wasm',
-        dtype: dtype as any,
-        progress_callback: (data: any) => {
+        dtype: dtype as 'q8' | 'fp32',
+        progress_callback: (data: ProgressData) => {
           if (data.status === 'progress' || data.status === 'downloading') {
             const progressValue = typeof data.progress === 'number' ? Math.round(data.progress) : 0;
             self.postMessage({
@@ -142,14 +149,15 @@ async function loadModel(modelName: string, dtype: string): Promise<void> {
       currentDtype = dtype;
 
       self.postMessage({ type: 'READY' });
-    } catch (wasmError: any) {
+    } catch (wasmError: unknown) {
+      const wasmErrorObj = wasmError instanceof Error ? wasmError : new Error(String(wasmError));
       // Error fatal en ambas tecnologías
       self.postMessage({
         type: 'ERROR',
         payload: {
           code: 'MODEL_LOAD_FAILED',
-          message: `Fallo completo de inicialización (WebGPU y WASM): ${wasmError.message || wasmError}`,
-          stack: wasmError.stack
+          message: `Fallo completo de inicialización (WebGPU y WASM): ${wasmErrorObj.message}`,
+          stack: wasmErrorObj.stack
         }
       });
     }

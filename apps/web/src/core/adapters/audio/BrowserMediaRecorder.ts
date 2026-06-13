@@ -62,7 +62,7 @@ export class BrowserMediaRecorder implements IAudioRecorder {
       // Clean up the stream immediately to turn off OS microphone indicator
       stream.getTracks().forEach((track) => track.stop());
       return { microphoneGranted: true };
-    } catch (error) {
+    } catch {
       return { microphoneGranted: false };
     }
   }
@@ -182,7 +182,7 @@ export class BrowserMediaRecorder implements IAudioRecorder {
         // Prevent onstop callback from executing and resolving/rejecting
         this.mediaRecorder.onstop = null;
         this.mediaRecorder.stop();
-      } catch (e) {
+      } catch {
         // Suppress errors during cancel stop
       }
     }
