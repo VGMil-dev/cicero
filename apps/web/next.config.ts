@@ -8,6 +8,7 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   /* config options here */
+  serverExternalPackages: ['@huggingface/transformers', 'onnxruntime-node'],
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
