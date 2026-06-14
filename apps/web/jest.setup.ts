@@ -22,6 +22,9 @@ class MockWorker {
     if (event === 'error') {
       this.onerror = callback;
     }
+    if (event === 'message') {
+      this.onmessage = callback;
+    }
   });
 
   removeEventListener = jest.fn();
@@ -54,4 +57,62 @@ if (typeof navigator !== 'undefined') {
     configurable: true,
   });
 }
+
+// 4. Mock global de MediaRecorder (necesario en jsdom que no implementa APIs de audio nativas)
+class MockMediaRecorder {
+  stream: any;
+  options?: any;
+  state: 'inactive' | 'recording' | 'paused' = 'inactive';
+  ondataavailable: ((event: any) => void) | null = null;
+  onstop: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+
+  static isTypeSupported = jest.fn().mockImplementation((mimeType: string) => {
+    // Retorna true por defecto para pasar todas las validaciones de tipo en adaptadores y tests
+    return true;
+  });
+
+  constructor(stream: any, options?: any) {
+    this.stream = stream;
+    this.options = options;
+  }
+
+  start = jest.fn().mockImplementation(() => {
+    this.state = 'recording';
+  });
+
+  stop = jest.fn().mockImplementation(() => {
+    this.state = 'inactive';
+    if (this.ondataavailable) {
+      this.ondataavailable({
+        data: new Blob(['audio-data-mock'], { type: this.options?.mimeType || 'audio/webm' }),
+      });
+    }
+    if (this.onstop) {
+      this.onstop();
+    }
+  });
+
+  pause = jest.fn().mockImplementation(() => {
+    this.state = 'paused';
+  });
+
+  resume = jest.fn().mockImplementation(() => {
+    this.state = 'recording';
+  });
+
+  addEventListener = jest.fn().mockImplementation((event: string, callback: any) => {
+    if (event === 'dataavailable') this.ondataavailable = callback;
+    if (event === 'stop') this.onstop = callback;
+    if (event === 'error') this.onerror = callback;
+  });
+
+  removeEventListener = jest.fn();
+  dispatchEvent = jest.fn().mockReturnValue(true);
+}
+
+if (typeof window !== 'undefined') {
+  (window as any).MediaRecorder = MockMediaRecorder;
+}
+(global as any).MediaRecorder = MockMediaRecorder;
 
