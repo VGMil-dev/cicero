@@ -28,6 +28,7 @@ const sidebars: SidebarsConfig = {
         'arquitectura/casos-de-uso',
         'arquitectura/decisiones',
         'arquitectura/contratos-captura',
+        'arquitectura/contratos-analisis',
         'arquitectura/mocks-captura',
         'arquitectura/adaptadores-captura-real',
         'arquitectura/persistencia-sesion',
