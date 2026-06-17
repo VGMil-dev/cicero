@@ -29,6 +29,7 @@ const sidebars: SidebarsConfig = {
         'arquitectura/decisiones',
         'arquitectura/contratos-captura',
         'arquitectura/mocks-captura',
+        'arquitectura/adaptadores-captura-real',
         'arquitectura/persistencia-sesion',
       ],
     },
