@@ -1,25 +1,6 @@
 import { IAudioModelBootstrap } from '../IAudioModelBootstrap';
-import { AudioCaptureState, ErrorCode, ErrorDTO, ProgressDTO } from '../types';
-
-/**
- * Error thrown by audio capture mocks.
- * Wraps an {@link ErrorDTO} in a native {@link Error} to preserve stack traces.
- */
-export class CaptureError extends Error {
-  /** Structured error data for UI consumption. */
-  public readonly dto: ErrorDTO;
-
-  /**
-   * @param code - Machine-readable error code.
-   * @param message - Human-readable error message.
-   * @param details - Optional technical details.
-   */
-  constructor(code: ErrorCode, message: string, details?: unknown) {
-    super(`[${code}] ${message}`);
-    this.name = 'CaptureError';
-    this.dto = { code, message, details };
-  }
-}
+import { AudioCaptureState, ProgressDTO, ProgressStatus } from '../types';
+import { CaptureError } from '../CaptureError';
 
 /**
  * Configuration options for {@link FakeAudioModelBootstrap}.
@@ -149,8 +130,26 @@ export class FakeAudioModelBootstrap implements IAudioModelBootstrap {
     return this.state;
   }
 
+  /**
+   * Safe termination of the simulated initialization process.
+   * Clears the active timer and resets state to 'idle'.
+   */
+  terminate(): void {
+    this.clearTimer();
+    this.state = 'idle';
+  }
+
+  /**
+   * Returns the active Web Worker instance (always null for Fake/Mock implementation).
+   */
+  getWorkerInstance(): Worker | null {
+    return null;
+  }
+
+
   private emitProgress(current: ProgressStage): void {
     const dto: ProgressDTO = {
+      status: current.stage as ProgressStatus,
       progress: current.progress,
       stage: current.stage,
     };

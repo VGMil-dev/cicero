@@ -7,8 +7,9 @@ describe("Home Page", () => {
     expect(screen.getByText(/Cicero/i)).toBeInTheDocument();
   });
 
-  it("renders the mock simulator header", () => {
+  it("renders the MVP badge", () => {
     render(<Home />);
-    expect(screen.getByText(/Simulador de Mocks/i)).toBeInTheDocument();
+    expect(screen.getByText(/MVP/i)).toBeInTheDocument();
   });
+
 });
