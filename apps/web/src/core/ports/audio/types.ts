@@ -63,10 +63,19 @@ export interface PermissionsDTO {
  * - `PERMISSION_DENIED`: Microphone access was rejected by the user.
  * - `MODEL_LOAD_FAILED`: Model files could not be downloaded or prepared.
  * - `RECORDING_FAILED`: Hardware capture failed during recording.
+ * - `DECODING_FAILED`: Audio decoding failed.
+ * - `ANALYSIS_FAILED`: Audio transcription/inference failed.
  * - `WASM_PANIC`: A fatal error or panic occurred within the WASM execution context.
  * - `UNKNOWN`: Unrecognized or unclassified error.
  */
-export type ErrorCode = 'PERMISSION_DENIED' | 'MODEL_LOAD_FAILED' | 'RECORDING_FAILED' | 'WASM_PANIC' | 'UNKNOWN';
+export type ErrorCode =
+  | 'PERMISSION_DENIED'
+  | 'MODEL_LOAD_FAILED'
+  | 'RECORDING_FAILED'
+  | 'DECODING_FAILED'
+  | 'ANALYSIS_FAILED'
+  | 'WASM_PANIC'
+  | 'UNKNOWN';
 
 /**
  * Data Transfer Object for error reporting in the audio flow.
@@ -112,6 +121,12 @@ export type MainThreadMessageDTO =
       type: 'TERMINATE';
       /** No payload required for termination */
       payload?: null;
+    }
+  | {
+      /** Action to start the audio analysis / inference process */
+      type: 'ANALYZE_AUDIO';
+      /** The raw PCM audio data (mono, 16kHz) to analyze */
+      payload: Float32Array;
     };
 
 /**
@@ -135,8 +150,38 @@ export type WorkerMessageDTO =
       type: 'ERROR';
       /** The detailed error payload, {@link ErrorDTO} */
       payload: ErrorDTO;
+    }
+  | {
+      /** Indicates that the audio analysis has finished successfully */
+      type: 'ANALYSIS_SUCCESS';
+      /** The resulting transcription data, {@link TranscriptionResultDTO} */
+      payload: TranscriptionResultDTO;
     };
 
+
+/**
+ * Data Transfer Object representing a raw audio chunk with timing metadata
+ * generated during audio transcription. Unlike {@link AudioChunkDTO}, it does not contain
+ * information about whether the word is a filler word.
+ */
+export interface RawAudioChunk {
+  /** The transcribed word or token */
+  word: string;
+  /** Start time of the word in seconds from the beginning of the audio */
+  start: number;
+  /** End time of the word in seconds from the beginning of the audio */
+  end: number;
+}
+
+/**
+ * Data Transfer Object representing the raw transcription result before fluency analysis.
+ */
+export interface TranscriptionResultDTO {
+  /** The complete transcribed text */
+  text: string;
+  /** The list of raw word-level timestamps, {@link RawAudioChunk} */
+  chunks: RawAudioChunk[];
+}
 
 /**
  * Data Transfer Object representing a single word chunk with timing metadata
