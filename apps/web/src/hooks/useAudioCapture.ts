@@ -133,6 +133,7 @@ export function useAudioCapture(
     try {
       const blob = await recorder.stopRecording();
       setAudioBlob(blob);
+      setState('ready');
       setIsAnalyzing(true);
       setError(null);
 
