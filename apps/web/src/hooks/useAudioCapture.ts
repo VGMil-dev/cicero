@@ -1,21 +1,34 @@
 import { useState, useCallback, useEffect } from 'react';
 import { IAudioModelBootstrap } from '../core/ports/audio/IAudioModelBootstrap';
 import { IAudioRecorder } from '../core/ports/audio/IAudioRecorder';
+import { IAudioDecoder } from '../core/ports/audio/IAudioDecoder';
+import { IAudioAnalyzer } from '../core/ports/audio/IAudioAnalyzer';
+import { ICalculateScoreUseCase, ScoreResult } from '../core/ports/analysis/ICalculateScoreUseCase';
 import { AudioCaptureState, ErrorDTO, ProgressDTO, ErrorCode } from '../core/ports/audio/types';
 
 /**
- * Hook to orchestrate the AI model bootstrap and audio recording flows.
- * Handles state transitions: idle -> loading-model -> ready -> recording -> ready.
- * Manages errors like permission denied or model loading failures.
+ * Hook to orchestrate the AI model bootstrap, audio recording, decoding, analysis, and scoring flows.
+ * Handles state transitions for recording and tracks asynchronous analysis progress.
+ *
+ * @param bootstrap - The adapter to load and bootstrap the AI model, {@link IAudioModelBootstrap}.
+ * @param recorder - The adapter to capture hardware microphone input, {@link IAudioRecorder}.
+ * @param audioDecoder - The adapter to decode audio blobs to mono PCM, {@link IAudioDecoder}.
+ * @param audioAnalyzer - The adapter to analyze audio PCM and transcribe it, {@link IAudioAnalyzer}.
+ * @param calculateScoreUseCase - The use case to evaluate speech and compute scores, {@link ICalculateScoreUseCase}.
  */
 export function useAudioCapture(
   bootstrap: IAudioModelBootstrap,
-  recorder: IAudioRecorder
+  recorder: IAudioRecorder,
+  audioDecoder: IAudioDecoder,
+  audioAnalyzer: IAudioAnalyzer,
+  calculateScoreUseCase: ICalculateScoreUseCase
 ) {
   const [state, setState] = useState<AudioCaptureState>('idle');
   const [progress, setProgress] = useState<ProgressDTO | null>(null);
   const [error, setError] = useState<ErrorDTO | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
 
   // Monitor worker error/panic events directly
   useEffect(() => {
@@ -121,6 +134,39 @@ export function useAudioCapture(
       const blob = await recorder.stopRecording();
       setAudioBlob(blob);
       setState('ready');
+      setIsAnalyzing(true);
+      setError(null);
+
+      try {
+        const pcm = await audioDecoder.decodeTo16kHzMono(blob);
+        const transcription = await audioAnalyzer.analyzeAudio(pcm);
+        const score = calculateScoreUseCase.execute(transcription);
+        setScoreResult(score);
+      } catch (procErr: unknown) {
+        console.error('Error durante el procesamiento del audio en useAudioCapture:', procErr);
+        setState('error');
+        const errObj = procErr as Record<string, unknown> | null;
+        const dto = errObj?.dto as Record<string, unknown> | null;
+        if (dto && typeof dto.code === 'string' && typeof dto.message === 'string') {
+          setError({
+            code: dto.code as ErrorCode,
+            message: dto.message,
+            details: dto.details,
+          });
+        } else {
+          const message = procErr instanceof Error ? procErr.message : 'Error al procesar el análisis de audio';
+          const code: ErrorCode = message.toLowerCase().includes('decod') || message.toLowerCase().includes('decode')
+            ? 'DECODING_FAILED'
+            : 'ANALYSIS_FAILED';
+          setError({
+            code,
+            message,
+            details: procErr,
+          });
+        }
+      } finally {
+        setIsAnalyzing(false);
+      }
     } catch (err: unknown) {
       setState('error');
       const errObj = err as Record<string, unknown> | null;
@@ -140,7 +186,7 @@ export function useAudioCapture(
         });
       }
     }
-  }, [recorder]);
+  }, [recorder, audioDecoder, audioAnalyzer, calculateScoreUseCase]);
 
   const cancelRecording = useCallback(() => {
     try {
@@ -174,6 +220,8 @@ export function useAudioCapture(
     setProgress(null);
     setError(null);
     setAudioBlob(null);
+    setIsAnalyzing(false);
+    setScoreResult(null);
   }, [bootstrap]);
 
   const terminateWorker = useCallback(() => {
@@ -182,6 +230,8 @@ export function useAudioCapture(
     setProgress(null);
     setError(null);
     setAudioBlob(null);
+    setIsAnalyzing(false);
+    setScoreResult(null);
   }, [bootstrap]);
 
   return {
@@ -189,6 +239,8 @@ export function useAudioCapture(
     progress,
     error,
     audioBlob,
+    isAnalyzing,
+    scoreResult,
     initializeModel,
     startRecording,
     stopRecording,
