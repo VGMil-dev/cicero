@@ -4,6 +4,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { FakeAudioModelBootstrap, FakeAudioRecorder } from '../core/ports/audio/mocks';
 import { WorkerAudioModelBootstrap } from '../core/adapters/audio/WorkerAudioModelBootstrap';
 import { BrowserMediaRecorder } from '../core/adapters/audio/BrowserMediaRecorder';
+import { BrowserAudioDecoder } from '../core/adapters/audio/BrowserAudioDecoder';
+import { FakeAudioAnalyzer } from '../core/ports/audio/mocks/FakeAudioAnalyzer';
+import { CalculateScoreUseCase } from '../core/usecases/CalculateScoreUseCase';
 import { useAudioCapture } from '../hooks/useAudioCapture';
 
 export default function Home() {
@@ -38,19 +41,35 @@ export default function Home() {
     });
   }, [useRealImplementation]);
 
+  const decoder = useMemo(() => {
+    return new BrowserAudioDecoder();
+  }, []);
+
+  const analyzer = useMemo(() => {
+    return new FakeAudioAnalyzer({
+      delayMs: useRealImplementation ? 2000 : 1000,
+    });
+  }, [useRealImplementation]);
+
+  const calculateScoreUseCase = useMemo(() => {
+    return new CalculateScoreUseCase();
+  }, []);
+
   // Hook orchestration
   const {
     state,
     progress,
     error,
     audioBlob,
+    isAnalyzing,
+    scoreResult,
     initializeModel,
     startRecording,
     stopRecording,
     cancelRecording,
     reset,
     terminateWorker,
-  } = useAudioCapture(bootstrap, recorder);
+  } = useAudioCapture(bootstrap, recorder, decoder, analyzer, calculateScoreUseCase);
 
   // Auto-start model loading on mount or when bootstrap changes
   useEffect(() => {
@@ -109,21 +128,7 @@ export default function Home() {
     };
   }, [state]);
 
-  // Dummy analysis for previewing feature 3 (highlighted transcript)
-  const dummyTranscript = [
-    { word: 'Hola', type: 'normal' },
-    { word: 'a', type: 'normal' },
-    { word: 'todos,', type: 'normal' },
-    { word: 'este...', type: 'filler' },
-    { word: 'hoy', type: 'normal' },
-    { word: 'quería', type: 'normal' },
-    { word: 'hablar', type: 'normal' },
-    { word: 'eh...', type: 'filler' },
-    { word: 'sobre', type: 'normal' },
-    { word: 'el', type: 'normal' },
-    { word: 'diseño', type: 'normal' },
-    { word: 'brutalista.', type: 'normal' },
-  ];
+
 
   return (
     <main className="flex-1 w-full min-h-screen bg-[#f5f4f0] p-6 md:p-12 font-body relative overflow-x-hidden bg-[radial-gradient(#d4d4d4_1px,transparent_1px)] [background-size:24px_24px]">
@@ -370,52 +375,137 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Simulated Output / Result Preview */}
-            {audioBlob && (
-              <div className="mt-8 border-3 border-black rounded-2xl p-6 bg-purple-50 relative shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-                <div className="absolute top-2 right-4 text-xs font-bold text-purple-400 rotate-3">REAL RESULT</div>
-                <h4 className="font-headline font-bold text-lg mb-3 flex items-center gap-2">
-                  <span>📦</span> Audio Grabado con Éxito
-                </h4>
-                
-                {/* Audio Blob Metadata */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-semibold border-2 border-black bg-white p-4 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                  <div>
-                    <span className="text-stone-400 block text-xs">TIPO MIME:</span>
-                    <code className="text-purple-600">{audioBlob.type}</code>
+            {/* Loading Analysis state */}
+            {isAnalyzing && (
+              <div className="mt-8 border-3 border-black rounded-2xl p-6 bg-amber-50 relative shadow-[4px_4px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center text-center">
+                <div className="absolute inset-0 bg-[radial-gradient(#e5e5e5_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none rounded-2xl" />
+                <div className="relative z-10 w-full max-w-md py-4">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-amber-100 border-2 border-black rounded-full flex items-center justify-center shadow-[3px_3px_0px_rgba(0,0,0,1)] animate-spin">
+                    <svg className="w-8 h-8 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.73-.73" />
+                    </svg>
                   </div>
-                  <div>
-                    <span className="text-stone-400 block text-xs">TAMAÑO DEL ARCHIVO:</span>
-                    <span className="text-stone-700">{audioBlob.size} bytes</span>
+                  <h4 className="font-headline font-bold text-xl mb-2 text-stone-900">Analizando grabación...</h4>
+                  <p className="text-stone-600 text-sm mb-4">
+                    Decodificando audio PCM local y procesando con el modelo de voz...
+                  </p>
+                  <div className="w-full h-6 bg-white border-3 border-black rounded-xl overflow-hidden relative shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                    <div className="h-full bg-neon-green border-r-3 border-black animate-stripes w-[70%]" />
                   </div>
                 </div>
+              </div>
+            )}
 
-                {/* Feature 2 & 3 Preview mockups */}
-                <div className="mt-6 border-2 border-dashed border-purple-300 p-4 rounded-xl bg-purple-50/50">
-                  <h5 className="font-headline font-bold text-xs uppercase tracking-wider text-purple-700 mb-2">
-                    🤖 Vista previa: Transcripción y Detección (Feature 2 & 3)
-                  </h5>
-                  <p className="text-xs text-stone-500 mb-3">
-                    En una integración real, este Blob se enviará al Web Worker y se analizará contra el diccionario de muletillas:
-                  </p>
-                  <div className="flex flex-wrap gap-2 text-base font-semibold font-body bg-white border-2 border-black p-3 rounded-lg shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                    {dummyTranscript.map((t, idx) => (
-                      <span
-                        key={idx}
-                        className={t.type === 'filler' ? 'bg-rose-200 text-rose-800 border border-rose-400 px-1 py-0.5 rounded rotate-1' : ''}
-                      >
-                        {t.word}
+            {/* Score Results Dashboard */}
+            {scoreResult && !isAnalyzing && (
+              <div className="mt-8 border-3 border-black bg-white rounded-2xl p-6 md:p-8 shadow-[6px_6px_0px_rgba(0,0,0,1)] relative overflow-hidden bg-[radial-gradient(#000000_1px,transparent_0)] bg-[size:20px_20px]">
+                <div className="absolute top-0 left-0 right-0 h-3 bg-neon-green border-b-3 border-black" />
+                
+                <div className="flex flex-col md:flex-row md:items-start gap-6 mt-4 relative z-10">
+                  
+                  {/* Left Column: Metrics */}
+                  <div className="w-full md:w-1/3 flex flex-col gap-4">
+                    {/* Score Card */}
+                    <div className="border-3 border-black bg-[#E1E1F5] rounded-xl p-4 text-center shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                      <span className="font-headline font-extrabold uppercase text-xs text-stone-600 block mb-1">
+                        Limpieza de Oratoria
                       </span>
-                    ))}
+                      <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-neon-green border-3 border-black font-headline font-extrabold text-3xl shadow-[3px_3px_0px_rgba(0,0,0,1)] rotate-3 my-2">
+                        {scoreResult.metrics.overallScore}%
+                      </div>
+                      <p className="text-xs font-semibold text-stone-700 mt-2">
+                        {scoreResult.metrics.overallScore >= 90
+                          ? '🏆 ¡Excelente fluidez!'
+                          : scoreResult.metrics.overallScore >= 75
+                          ? '👍 Buena comunicación'
+                          : '⚠️ Podés mejorar la fluidez'}
+                      </p>
+                    </div>
+
+                    {/* WPM Card */}
+                    <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                      <span className="font-headline font-extrabold uppercase text-xs text-stone-500 block mb-1">
+                        Velocidad (WPM)
+                      </span>
+                      <div className="font-headline font-extrabold text-3xl text-black">
+                        {scoreResult.metrics.wordsPerMinute} <span className="text-sm font-bold text-stone-500">palabras/min</span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className={`w-3.5 h-3.5 rounded-full border border-black inline-block shadow-[1px_1px_0px_rgba(0,0,0,1)]
+                          ${scoreResult.metrics.wordsPerMinute >= 110 && scoreResult.metrics.wordsPerMinute <= 150
+                            ? 'bg-emerald-300'
+                            : 'bg-amber-300'
+                          }`}
+                        />
+                        <span className="text-xs font-semibold text-stone-600">
+                          {scoreResult.metrics.wordsPerMinute >= 110 && scoreResult.metrics.wordsPerMinute <= 150
+                            ? 'Velocidad Óptima (110-150)'
+                            : scoreResult.metrics.wordsPerMinute < 110
+                            ? 'Ritmo pausado (<110)'
+                            : 'Ritmo rápido (>150)'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Filler Words Breakdown Card */}
+                    <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex-1">
+                      <span className="font-headline font-extrabold uppercase text-xs text-stone-500 block mb-2">
+                        Desglose de Muletillas ({scoreResult.metrics.fillerWordsCount})
+                      </span>
+                      {scoreResult.metrics.fillerWordsCount > 0 ? (
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {Object.entries(scoreResult.metrics.fillerWordsBreakdown).map(([word, count]) => (
+                            <span
+                              key={word}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 border-2 border-black rounded-lg bg-[#FFDAD6] text-xs font-bold shadow-[2px_2px_0px_rgba(0,0,0,1)] -rotate-1"
+                            >
+                              <code className="text-stone-900 font-extrabold">{word}</code>
+                              <span className="bg-white border border-black rounded-full w-5 h-5 flex items-center justify-center text-[10px]">
+                                {count}
+                              </span>
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-stone-500 italic">¡No se detectaron muletillas en el audio!</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="text-xs font-bold text-stone-600">
-                      Score de Oratoria Esperado:
-                    </span>
-                    <span className="bg-emerald-300 text-black border border-black text-xs font-extrabold px-2 py-0.5 rounded shadow-[1px_1px_0px_rgba(0,0,0,1)]">
-                      83.3% Limpieza (2 muletillas)
-                    </span>
+
+                  {/* Right Column: Verbatim Transcription */}
+                  <div className="w-full md:w-2/3 border-3 border-black bg-white rounded-xl p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] min-h-[250px] flex flex-col">
+                    <h5 className="font-headline font-bold text-sm uppercase text-stone-500 mb-4 border-b-2 border-black pb-2 flex items-center justify-between">
+                      <span>📝 Transcripción del Discurso</span>
+                      <span className="bg-stone-100 text-stone-800 border border-black text-[10px] px-2 py-0.5 rounded font-bold uppercase shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                        Verbatim
+                      </span>
+                    </h5>
+                    <div className="flex flex-wrap gap-x-2 gap-y-3 text-lg font-semibold leading-relaxed text-stone-850 flex-1 content-start">
+                      {scoreResult.chunks.map((chunk, idx) => {
+                        if (chunk.isFillerWord) {
+                          return (
+                            <span
+                              key={idx}
+                              className="inline-block bg-[#FFDAD6] text-red-950 border-2 border-black px-1.5 py-0.5 rounded-md font-extrabold rotate-[-1deg] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] transition-transform hover:scale-105 hover:rotate-1"
+                              title={`Muletilla detectada (${chunk.start.toFixed(1)}s - ${chunk.end.toFixed(1)}s)`}
+                            >
+                              {chunk.word}
+                            </span>
+                          );
+                        }
+                        return (
+                          <span
+                            key={idx}
+                            className="inline-block text-stone-850 transition-colors hover:text-black py-0.5"
+                            title={`${chunk.start.toFixed(1)}s - ${chunk.end.toFixed(1)}s`}
+                          >
+                            {chunk.word}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
+
                 </div>
               </div>
             )}
