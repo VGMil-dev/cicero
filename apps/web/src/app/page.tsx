@@ -545,39 +545,40 @@ export default function Home() {
                     {/* Sub-grid of 3 metrics */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       {/* Card 1: WPM */}
-                      <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3">
+                      <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 border-2 border-black rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
                           <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M3 12a9 9 0 0 1 15-6.7L12 12Z" />
                             <path d="m12 12 4-4" />
                           </svg>
                         </div>
-                        <div>
-                          <span className="font-headline font-extrabold uppercase text-[10px] text-stone-500 block">
-                            VELOCIDAD (WPM)
-                          </span>
-                          <span className="font-headline font-extrabold text-2xl text-black">
+                        <div className="flex flex-col min-w-0">
+                          <div className="font-headline font-extrabold uppercase text-[10px] text-stone-500 leading-tight truncate">
+                            VELOCIDAD
+                          </div>
+                          <div className="font-headline font-extrabold text-2xl text-black leading-none my-1 flex items-baseline gap-1">
                             {scoreResult.metrics.wordsPerMinute}
-                          </span>
-                          <span className="text-[10px] font-semibold text-stone-500 block">
+                            <span className="text-[10px] font-extrabold text-stone-500 uppercase">WPM</span>
+                          </div>
+                          <div className="text-[10px] font-semibold text-stone-500 leading-tight truncate">
                             {scoreResult.metrics.wordsPerMinute >= 110 && scoreResult.metrics.wordsPerMinute <= 150 ? 'Ritmo óptimo' : 'Ritmo irregular'}
-                          </span>
+                          </div>
                         </div>
                       </div>
 
                       {/* Card 2: Duración */}
-                      <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3">
+                      <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 border-2 border-black rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
                           <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="10" />
                             <polyline points="12 6 12 12 16 14" />
                           </svg>
                         </div>
-                        <div>
-                          <span className="font-headline font-extrabold uppercase text-[10px] text-stone-500 block">
+                        <div className="flex flex-col min-w-0">
+                          <div className="font-headline font-extrabold uppercase text-[10px] text-stone-500 leading-tight truncate">
                             DURACIÓN
-                          </span>
-                          <span className="font-headline font-extrabold text-2xl text-black">
+                          </div>
+                          <div className="font-headline font-extrabold text-2xl text-black leading-none my-1">
                             {(() => {
                               const lastChunk = scoreResult.chunks[scoreResult.chunks.length - 1];
                               const duration = lastChunk ? lastChunk.end : 0;
@@ -585,15 +586,15 @@ export default function Home() {
                               const s = Math.floor(duration % 60).toString().padStart(2, '0');
                               return `${m}:${s}`;
                             })()}
-                          </span>
-                          <span className="text-[10px] font-semibold text-stone-500 block">
+                          </div>
+                          <div className="text-[10px] font-semibold text-stone-500 leading-tight truncate">
                             Tiempo de captura
-                          </span>
+                          </div>
                         </div>
                       </div>
 
                       {/* Card 3: Puntuación general */}
-                      <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3">
+                      <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 border-2 border-black rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
                           <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
@@ -603,14 +604,15 @@ export default function Home() {
                             <path d="M12 2a6 6 0 0 1 6 6v5a6 6 0 0 1-12 0V8a6 6 0 0 1 6-6Z" />
                           </svg>
                         </div>
-                        <div>
-                          <span className="font-headline font-extrabold uppercase text-[10px] text-stone-500 block">
-                            PUNTUACIÓN TOTAL
-                          </span>
-                          <span className="font-headline font-extrabold text-2xl text-black">
-                            {(scoreResult.metrics.overallScore / 10).toFixed(1)}/10
-                          </span>
-                          <div className="flex gap-0.5 mt-1">
+                        <div className="flex flex-col min-w-0">
+                          <div className="font-headline font-extrabold uppercase text-[10px] text-stone-500 leading-tight truncate">
+                            PUNTUACIÓN
+                          </div>
+                          <div className="font-headline font-extrabold text-2xl text-black leading-none my-1 flex items-baseline gap-0.5">
+                            {(scoreResult.metrics.overallScore / 10).toFixed(1)}
+                            <span className="text-[10px] font-extrabold text-stone-500">/10</span>
+                          </div>
+                          <div className="flex gap-0.5 mt-0.5">
                             {Array.from({ length: 5 }).map((_, i) => {
                               const filled = i < Math.round(scoreResult.metrics.overallScore / 20);
                               return (
@@ -632,28 +634,28 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Tips Card: Profe Guau */}
-                    <div className="border-3 border-black bg-[#E1E1F5] rounded-2xl p-5 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex gap-4 items-center relative overflow-hidden">
+                    {/* Tips Card */}
+                    <div className="border-3 border-black bg-[#E1E1F5] rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex flex-col gap-2 relative overflow-hidden">
                       {/* Sketchy circles in background */}
                       <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full border-3 border-black opacity-10" />
                       <div className="absolute -right-2 -bottom-2 w-16 h-16 rounded-full border-3 border-black opacity-10" />
-                      
-                      {/* Mascot / Avatar box */}
-                      <div className="w-20 h-20 flex-shrink-0 border-3 border-black rounded-xl bg-white flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)] overflow-hidden">
-                        <img src="/profe_guau.png" alt="Profe Guau" className="w-full h-full object-cover" />
+
+                      <div className="flex items-center gap-2">
+                        <svg className="w-5 h-5 text-black flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="16" x2="12" y2="12" />
+                          <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                        <h4 className="font-headline font-extrabold text-sm uppercase text-black tracking-wider">
+                          Recomendaciones de Oratoria
+                        </h4>
                       </div>
 
-                      {/* Feedback Text */}
-                      <div className="flex-1">
-                        <h4 className="font-headline font-extrabold text-sm uppercase text-black tracking-wider mb-1">
-                          Tips del Profe Guau
-                        </h4>
-                        <p className="text-xs text-stone-700 leading-relaxed font-semibold italic">
-                          {scoreResult.metrics.overallScore >= 85
-                            ? '"¡Gran ritmo! Estás fluyendo muy bien. Seguí expresándote de forma pausada y usá el silencio estratégico para potenciar tu discurso."'
-                            : `"Detecté que tu muletilla favorita hoy fue '${Object.keys(scoreResult.metrics.fillerWordsBreakdown)[0] || 'eh'}'. Intentá reducirla respirando hondo en las transiciones de ideas para sonar con mayor autoridad."`}
-                        </p>
-                      </div>
+                      <p className="text-sm text-stone-850 leading-relaxed font-semibold italic">
+                        {scoreResult.metrics.overallScore >= 85
+                          ? '"¡Gran ritmo! Estás fluyendo muy bien. Seguí expresándote de forma pausada y usá el silencio estratégico para potenciar tu discurso."'
+                          : `"Detecté que tu muletilla favorita hoy fue '${Object.keys(scoreResult.metrics.fillerWordsBreakdown)[0] || 'eh'}'. Intentá reducirla respirando hondo en las transiciones de ideas para sonar con mayor autoridad."`}
+                      </p>
                     </div>
                   </div>
                   
