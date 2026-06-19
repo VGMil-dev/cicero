@@ -122,9 +122,8 @@ describe('useAudioCapture Hook', () => {
     const recorder = new FakeAudioRecorder();
     const { result } = renderHook(() => useAudioCapture(bootstrap, recorder));
 
-    let initPromise: Promise<void>;
     act(() => {
-      initPromise = result.current.initializeModel();
+      void result.current.initializeModel();
     });
 
     expect(result.current.state).toBe('loading-model');
