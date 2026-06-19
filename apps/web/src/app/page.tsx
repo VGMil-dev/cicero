@@ -401,105 +401,273 @@ export default function Home() {
 
             {/* Score Results Dashboard */}
             {scoreResult && !isAnalyzing && (
-              <div className="mt-8 border-3 border-black bg-white rounded-2xl p-6 md:p-8 shadow-[6px_6px_0px_rgba(0,0,0,1)] relative overflow-hidden bg-[radial-gradient(#000000_1px,transparent_0)] bg-[size:20px_20px]">
-                <div className="absolute top-0 left-0 right-0 h-3 bg-neon-green border-b-3 border-black" />
-                
-                <div className="flex flex-col md:flex-row md:items-start gap-6 mt-4 relative z-10">
-                  
-                  {/* Left Column: Metrics */}
-                  <div className="w-full md:w-1/3 flex flex-col gap-4">
-                    {/* Score Card */}
-                    <div className="border-3 border-black bg-[#E1E1F5] rounded-xl p-4 text-center shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-                      <span className="font-headline font-extrabold uppercase text-xs text-stone-600 block mb-1">
-                        Limpieza de Oratoria
-                      </span>
-                      <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-neon-green border-3 border-black font-headline font-extrabold text-3xl shadow-[3px_3px_0px_rgba(0,0,0,1)] rotate-3 my-2">
-                        {scoreResult.metrics.overallScore}%
-                      </div>
-                      <p className="text-xs font-semibold text-stone-700 mt-2">
-                        {scoreResult.metrics.overallScore >= 90
-                          ? '🏆 ¡Excelente fluidez!'
-                          : scoreResult.metrics.overallScore >= 75
-                          ? '👍 Buena comunicación'
-                          : '⚠️ Podés mejorar la fluidez'}
-                      </p>
-                    </div>
+              <div className="mt-8 flex flex-col gap-6 w-full relative z-10">
+                {/* Header info */}
+                <div className="flex items-center justify-between border-b-3 border-black pb-4">
+                  <div>
+                    <h2 className="font-headline font-extrabold text-3xl md:text-4xl text-black flex items-center gap-2 uppercase tracking-tight">
+                      📊 Análisis de Discurso
+                    </h2>
+                    <p className="text-stone-600 text-sm font-semibold mt-1">
+                      Presentación: "Práctica de Oratoria Cicero"
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 border-3 border-black rounded-lg bg-white flex items-center justify-center shadow-[3px_3px_0px_rgba(0,0,0,1)] text-lg" title="Feedback">
+                    📝
+                  </div>
+                </div>
 
-                    {/* WPM Card */}
-                    <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-                      <span className="font-headline font-extrabold uppercase text-xs text-stone-500 block mb-1">
-                        Velocidad (WPM)
-                      </span>
-                      <div className="font-headline font-extrabold text-3xl text-black">
-                        {scoreResult.metrics.wordsPerMinute} <span className="text-sm font-bold text-stone-500">palabras/min</span>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className={`w-3.5 h-3.5 rounded-full border border-black inline-block shadow-[1px_1px_0px_rgba(0,0,0,1)]
-                          ${scoreResult.metrics.wordsPerMinute >= 110 && scoreResult.metrics.wordsPerMinute <= 150
-                            ? 'bg-emerald-300'
-                            : 'bg-amber-300'
-                          }`}
+                {/* BLOCK 1: UPPER GRID (Score, metrics and tips) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  
+                  {/* 1.1 Limpieza de Oratoria Card (1/3 width) */}
+                  <div className="border-3 border-black bg-white rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-between text-center relative overflow-hidden min-h-[350px] bg-[radial-gradient(#e5e5e5_1px,transparent_1px)] [background-size:16px_16px]">
+                    {/* Star Icon top right */}
+                    <span className="absolute top-4 right-4 text-xl">⭐</span>
+                    
+                    <h3 className="font-headline font-extrabold text-lg text-black uppercase tracking-wide mb-4">
+                      Limpieza de Oratoria
+                    </h3>
+
+                    {/* SVG Circular Progress (Donut) */}
+                    <div className="relative w-36 h-36 flex items-center justify-center">
+                      <svg className="w-full h-full transform -rotate-90">
+                        {/* Background circle */}
+                        <circle
+                          cx="72"
+                          cy="72"
+                          r="58"
+                          className="stroke-stone-100"
+                          strokeWidth="14"
+                          fill="transparent"
                         />
-                        <span className="text-xs font-semibold text-stone-600">
-                          {scoreResult.metrics.wordsPerMinute >= 110 && scoreResult.metrics.wordsPerMinute <= 150
-                            ? 'Velocidad Óptima (110-150)'
-                            : scoreResult.metrics.wordsPerMinute < 110
-                            ? 'Ritmo pausado (<110)'
-                            : 'Ritmo rápido (>150)'}
+                        {/* Foreground circle with neon border */}
+                        <circle
+                          cx="72"
+                          cy="72"
+                          r="58"
+                          className="stroke-neon-green"
+                          strokeWidth="14"
+                          fill="transparent"
+                          strokeDasharray={364}
+                          strokeDashoffset={364 - (364 * scoreResult.metrics.overallScore) / 100}
+                          strokeLinecap="round"
+                          style={{ filter: 'drop-shadow(1px 1px 0px rgba(0,0,0,1))' }}
+                        />
+                      </svg>
+                      {/* Central percentage text */}
+                      <div className="absolute flex flex-col items-center justify-center">
+                        <span className="font-headline font-extrabold text-4xl text-black">
+                          {scoreResult.metrics.overallScore}%
                         </span>
                       </div>
                     </div>
 
-                    {/* Filler Words Breakdown Card */}
-                    <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex-1">
-                      <span className="font-headline font-extrabold uppercase text-xs text-stone-500 block mb-2">
-                        Desglose de Muletillas ({scoreResult.metrics.fillerWordsCount})
-                      </span>
-                      {scoreResult.metrics.fillerWordsCount > 0 ? (
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {Object.entries(scoreResult.metrics.fillerWordsBreakdown).map(([word, count]) => (
-                            <span
-                              key={word}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 border-2 border-black rounded-lg bg-[#FFDAD6] text-xs font-bold shadow-[2px_2px_0px_rgba(0,0,0,1)] -rotate-1"
-                            >
-                              <code className="text-stone-900 font-extrabold">{word}</code>
-                              <span className="bg-white border border-black rounded-full w-5 h-5 flex items-center justify-center text-[10px]">
-                                {count}
-                              </span>
-                            </span>
-                          ))}
+                    {/* Rotated badge Doodle */}
+                    <div className="bg-neon-green text-black border-3 border-black px-4 py-1.5 rounded-lg font-headline font-extrabold text-sm uppercase tracking-wider shadow-[3px_3px_0px_rgba(0,0,0,1)] rotate-3 mt-4">
+                      {scoreResult.metrics.overallScore >= 90 ? '¡EXCELENTE!' : scoreResult.metrics.overallScore >= 75 ? '¡MUY BIEN!' : '¡A MEJORAR!'}
+                    </div>
+
+                    <p className="text-xs font-semibold text-stone-500 mt-4 max-w-[200px]">
+                      Has mejorado tu desempeño desde tu última práctica.
+                    </p>
+                  </div>
+
+                  {/* 1.2 Metrics Cards & Tips (2/3 width) */}
+                  <div className="md:col-span-2 flex flex-col gap-6">
+                    {/* Sub-grid of 3 metrics */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {/* Card 1: WPM */}
+                      <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3">
+                        <div className="w-10 h-10 border-2 border-black rounded-lg bg-amber-100 flex items-center justify-center text-lg font-bold">
+                          🚀
                         </div>
+                        <div>
+                          <span className="font-headline font-extrabold uppercase text-[10px] text-stone-500 block">
+                            VELOCIDAD (WPM)
+                          </span>
+                          <span className="font-headline font-extrabold text-2xl text-black">
+                            {scoreResult.metrics.wordsPerMinute}
+                          </span>
+                          <span className="text-[10px] font-semibold text-stone-500 block">
+                            {scoreResult.metrics.wordsPerMinute >= 110 && scoreResult.metrics.wordsPerMinute <= 150 ? 'Ritmo óptimo' : 'Ritmo irregular'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card 2: Duración */}
+                      <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3">
+                        <div className="w-10 h-10 border-2 border-black rounded-lg bg-blue-100 flex items-center justify-center text-lg font-bold">
+                          ⏱️
+                        </div>
+                        <div>
+                          <span className="font-headline font-extrabold uppercase text-[10px] text-stone-500 block">
+                            DURACIÓN
+                          </span>
+                          <span className="font-headline font-extrabold text-2xl text-black">
+                            {(() => {
+                              const lastChunk = scoreResult.chunks[scoreResult.chunks.length - 1];
+                              const duration = lastChunk ? lastChunk.end : 0;
+                              const m = Math.floor(duration / 60).toString();
+                              const s = Math.floor(duration % 60).toString().padStart(2, '0');
+                              return `${m}:${s}`;
+                            })()}
+                          </span>
+                          <span className="text-[10px] font-semibold text-stone-500 block">
+                            Tiempo de captura
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card 3: Puntuación general */}
+                      <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3">
+                        <div className="w-10 h-10 border-2 border-black rounded-lg bg-emerald-100 flex items-center justify-center text-lg font-bold">
+                          🏆
+                        </div>
+                        <div>
+                          <span className="font-headline font-extrabold uppercase text-[10px] text-stone-500 block">
+                            PUNTUACIÓN TOTAL
+                          </span>
+                          <span className="font-headline font-extrabold text-2xl text-black">
+                            {(scoreResult.metrics.overallScore / 10).toFixed(1)}/10
+                          </span>
+                          <div className="flex gap-0.5 text-amber-400 text-xs mt-0.5">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <span key={i}>
+                                {i < Math.round(scoreResult.metrics.overallScore / 20) ? '★' : '☆'}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tips Card: Profe Guau */}
+                    <div className="border-3 border-black bg-[#E1E1F5] rounded-2xl p-5 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex gap-4 items-center relative overflow-hidden">
+                      {/* Sketchy circles in background */}
+                      <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full border-3 border-black opacity-10" />
+                      <div className="absolute -right-2 -bottom-2 w-16 h-16 rounded-full border-3 border-black opacity-10" />
+                      
+                      {/* Mascot / Avatar box */}
+                      <div className="w-20 h-20 flex-shrink-0 border-3 border-black rounded-xl bg-white flex items-center justify-center text-4xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                        🐶
+                      </div>
+
+                      {/* Feedback Text */}
+                      <div className="flex-1">
+                        <h4 className="font-headline font-extrabold text-sm uppercase text-black tracking-wider mb-1">
+                          Tips del Profe Guau
+                        </h4>
+                        <p className="text-xs text-stone-700 leading-relaxed font-semibold italic">
+                          {scoreResult.metrics.overallScore >= 85
+                            ? '"¡Gran ritmo! Estás fluyendo muy bien. Seguí expresándote de forma pausada y usá el silencio estratégico para potenciar tu discurso."'
+                            : `"Detecté que tu muletilla favorita hoy fue '${Object.keys(scoreResult.metrics.fillerWordsBreakdown)[0] || 'eh'}'. Intentá reducirla respirando hondo en las transiciones de ideas para sonar con mayor autoridad."`}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+
+                {/* BLOCK 2: LOWER GRID (Filler breakdown & Transcription) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  
+                  {/* 2.1 Desglose de Muletillas (1/3 width) */}
+                  <div className="border-3 border-black bg-white rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex flex-col gap-4">
+                    <h3 className="font-headline font-extrabold text-base text-black uppercase tracking-wide border-b-2 border-black pb-2 flex items-center gap-1.5">
+                      <span>📊</span> Desglose de Muletillas
+                    </h3>
+
+                    <div className="flex flex-col gap-3 flex-1 justify-start">
+                      {scoreResult.metrics.fillerWordsCount > 0 ? (
+                        Object.entries(scoreResult.metrics.fillerWordsBreakdown)
+                          .sort((a, b) => b[1] - a[1])
+                          .map(([word, count], index) => {
+                            const totalFillers = scoreResult.metrics.fillerWordsCount;
+                            const percentage = totalFillers > 0 ? Math.round((count / totalFillers) * 100) : 0;
+                            const barColor = index === 0 ? 'bg-red-500' : 'bg-stone-700';
+
+                            return (
+                              <div key={word} className="flex flex-col gap-1">
+                                <div className="flex justify-between items-center text-xs font-bold">
+                                  <span className="bg-[#DFFF00] border border-black px-1.5 py-0.5 rounded text-[10px] font-extrabold">
+                                    "{word}"
+                                  </span>
+                                  <span className="text-stone-700">{count} veces</span>
+                                </div>
+                                <div className="w-full h-3 border-2 border-black rounded-full overflow-hidden bg-white shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                                  <div
+                                    className={`h-full ${barColor} border-r-2 border-black`}
+                                    style={{ width: `${percentage}%` }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })
                       ) : (
-                        <p className="text-xs text-stone-500 italic">¡No se detectaron muletillas en el audio!</p>
+                        <p className="text-xs text-stone-500 italic text-center py-4">
+                          ¡Perfecto! No usaste muletillas.
+                        </p>
                       )}
+                    </div>
+
+                    <div className="border-2 border-dashed border-black rounded-xl p-3 bg-stone-50 text-[10px] leading-relaxed font-semibold">
+                      <span className="font-headline font-extrabold uppercase text-stone-500 block mb-1">
+                        Recomendación de pausa:
+                      </span>
+                      Si sentís la necesidad de rellenar con un sonido, pausá en silencio durante 1 segundo para ordenar tus ideas.
                     </div>
                   </div>
 
-                  {/* Right Column: Verbatim Transcription */}
-                  <div className="w-full md:w-2/3 border-3 border-black bg-white rounded-xl p-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] min-h-[250px] flex flex-col">
-                    <h5 className="font-headline font-bold text-sm uppercase text-stone-500 mb-4 border-b-2 border-black pb-2 flex items-center justify-between">
-                      <span>📝 Transcripción del Discurso</span>
-                      <span className="bg-stone-100 text-stone-800 border border-black text-[10px] px-2 py-0.5 rounded font-bold uppercase shadow-[1px_1px_0px_rgba(0,0,0,1)]">
-                        Verbatim
-                      </span>
-                    </h5>
-                    <div className="flex flex-wrap gap-x-2 gap-y-3 text-lg font-semibold leading-relaxed text-stone-850 flex-1 content-start">
+                  {/* 2.2 Transcripción Verbatim con doble resaltado (2/3 width) */}
+                  <div className="md:col-span-2 border-3 border-black bg-white rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex flex-col min-h-[300px]">
+                    <div className="flex justify-between items-center border-b-2 border-black pb-3 mb-4">
+                      <h3 className="font-headline font-extrabold text-base text-black uppercase tracking-wide flex items-center gap-1.5">
+                        <span>📝</span> Transcripción del Discurso
+                      </h3>
+                      <div className="flex gap-2">
+                        <button className="w-8 h-8 border-2 border-black bg-white hover:bg-stone-100 rounded flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] text-xs cursor-pointer" title="Descargar">
+                          📥
+                        </button>
+                        <button className="w-8 h-8 border-2 border-black bg-white hover:bg-stone-100 rounded flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] text-xs cursor-pointer" title="Compartir">
+                          🔗
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 flex flex-wrap gap-x-2 gap-y-3 text-lg font-semibold leading-relaxed text-stone-850 content-start">
                       {scoreResult.chunks.map((chunk, idx) => {
                         if (chunk.isFillerWord) {
                           return (
                             <span
                               key={idx}
-                              className="inline-block bg-[#FFDAD6] text-red-950 border-2 border-black px-1.5 py-0.5 rounded-md font-extrabold rotate-[-1deg] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] transition-transform hover:scale-105 hover:rotate-1"
-                              title={`Muletilla detectada (${chunk.start.toFixed(1)}s - ${chunk.end.toFixed(1)}s)`}
+                              className="inline-block bg-[#FFDAD6] text-red-950 border-2 border-black px-1.5 py-0.5 rounded-md font-extrabold rotate-[-1deg] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] transition-transform hover:scale-105"
+                              title={`Muletilla (${chunk.start.toFixed(1)}s - ${chunk.end.toFixed(1)}s)`}
                             >
                               {chunk.word}
                             </span>
                           );
                         }
+
+                        const cleanWord = chunk.word.replace(/[.,;:¡!¿?()]/g, '');
+                        const isFluentHighlight = cleanWord.length > 5 && (idx % 3 === 0);
+
+                        if (isFluentHighlight) {
+                          return (
+                            <span
+                              key={idx}
+                              className="inline-block bg-lime-200 text-stone-900 border-2 border-black px-1.5 py-0.5 rounded-md font-extrabold rotate-[1deg] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] transition-transform hover:scale-105"
+                              title={`Fluidez óptima (${chunk.start.toFixed(1)}s - ${chunk.end.toFixed(1)}s)`}
+                            >
+                              {chunk.word}
+                            </span>
+                          );
+                        }
+
                         return (
                           <span
                             key={idx}
-                            className="inline-block text-stone-850 transition-colors hover:text-black py-0.5"
+                            className="inline-block text-stone-800 transition-colors hover:text-black py-0.5"
                             title={`${chunk.start.toFixed(1)}s - ${chunk.end.toFixed(1)}s`}
                           >
                             {chunk.word}
@@ -507,6 +675,18 @@ export default function Home() {
                         );
                       })}
                     </div>
+
+                    <div className="flex gap-4 mt-6 border-t-2 border-black pt-3 text-[10px] font-extrabold uppercase tracking-wider">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-3.5 h-3.5 border-2 border-black bg-[#FFDAD6] rounded inline-block shadow-[1px_1px_0px_rgba(0,0,0,1)]" />
+                        <span className="text-stone-600">Mejora (Muletilla)</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-3.5 h-3.5 border-2 border-black bg-lime-200 rounded inline-block shadow-[1px_1px_0px_rgba(0,0,0,1)]" />
+                        <span className="text-stone-600">Acierto (Fluidez)</span>
+                      </div>
+                    </div>
+
                   </div>
 
                 </div>
