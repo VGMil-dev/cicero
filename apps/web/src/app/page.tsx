@@ -139,7 +139,12 @@ export default function Home() {
       <header className="max-w-3xl mx-auto mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-4 border-black pb-6">
         <div>
           <h1 className="font-headline font-extrabold text-4xl md:text-5xl uppercase tracking-tight text-black flex items-center gap-3">
-            🎙️ Cicero <span className="bg-neon-green text-black border-2 border-black text-xs px-2 py-1 font-body normal-case font-bold rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">MVP</span>
+            <svg className="w-8 h-8 text-black inline-block flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+              <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
+              <line x1="12" x2="12" y1="19" y2="22" />
+            </svg>
+            Cicero <span className="bg-neon-green text-black border-2 border-black text-xs px-2 py-1 font-body normal-case font-bold rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">MVP</span>
           </h1>
           <p className="text-stone-600 mt-2 text-lg font-medium">
             Carga de Modelo de Voz local en segundo plano y captura privada de audio.
@@ -171,18 +176,51 @@ export default function Home() {
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-2">
                 <span className="font-headline font-bold uppercase text-xs text-stone-500">Estado actual:</span>
-                <span className={`inline-flex items-center px-3 py-1 text-sm font-bold border-2 border-black rounded-full uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]
+                <span className={`inline-flex items-center px-3 py-1 text-sm font-bold border-2 border-black rounded-full uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)] gap-1.5
                   ${state === 'idle' ? 'bg-stone-200 text-black' : ''}
                   ${state === 'loading-model' ? 'bg-amber-300 text-black animate-pulse' : ''}
                   ${state === 'ready' ? 'bg-emerald-300 text-black' : ''}
                   ${state === 'recording' ? 'bg-red-400 text-white animate-pulse' : ''}
                   ${state === 'error' ? 'bg-rose-400 text-black' : ''}
                 `}>
-                  {state === 'idle' && '💤 Inactivo'}
-                  {state === 'loading-model' && '🤖 Cargando Modelo'}
-                  {state === 'ready' && '✅ Modelo Listo'}
-                  {state === 'recording' && '🔴 Grabando Voz'}
-                  {state === 'error' && '⚠️ Error'}
+                  {state === 'idle' && (
+                    <>
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                      </svg>
+                      Inactivo
+                    </>
+                  )}
+                  {state === 'loading-model' && (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.73-.73" />
+                      </svg>
+                      Cargando Modelo
+                    </>
+                  )}
+                  {state === 'ready' && (
+                    <>
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Modelo Listo
+                    </>
+                  )}
+                  {state === 'recording' && (
+                    <>
+                      <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping inline-block" />
+                      Grabando Voz
+                    </>
+                  )}
+                  {state === 'error' && (
+                    <>
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                      </svg>
+                      Error
+                    </>
+                  )}
                 </span>
               </div>
               <button
@@ -215,7 +253,9 @@ export default function Home() {
                 {state === 'idle' && (
                   <div className="max-w-md">
                     <div className="w-16 h-16 mx-auto mb-4 bg-stone-100 border-2 border-black rounded-full flex items-center justify-center shadow-[3px_3px_0px_rgba(0,0,0,1)]">
-                      <span className="text-3xl">💤</span>
+                      <svg className="w-8 h-8 text-stone-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                      </svg>
                     </div>
                     <h3 className="font-headline font-bold text-2xl mb-2">Punto de Partida</h3>
                     <p className="text-stone-600 mb-6 text-sm">
@@ -225,7 +265,12 @@ export default function Home() {
                       onClick={initializeModel}
                       className="px-6 py-3 bg-neon-green text-black font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-sm cursor-pointer"
                     >
-                      🚀 Inicializar Modelo
+                      <span className="flex items-center justify-center gap-1.5">
+                        <svg className="w-4 h-4 text-black flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                        Inicializar Modelo
+                      </span>
                     </button>
                   </div>
                 )}
@@ -234,7 +279,13 @@ export default function Home() {
                 {state === 'loading-model' && (
                   <div className="w-full max-w-md">
                     <div className="w-16 h-16 mx-auto mb-4 bg-amber-100 border-2 border-black rounded-full flex items-center justify-center shadow-[3px_3px_0px_rgba(0,0,0,1)] animate-bounce">
-                      <span className="text-3xl">🤖</span>
+                      <svg className="w-8 h-8 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="11" width="18" height="10" rx="2" />
+                        <circle cx="12" cy="5" r="2" />
+                        <path d="M12 7v4" />
+                        <line x1="8" y1="16" x2="8" y2="16" />
+                        <line x1="16" y1="16" x2="16" y2="16" />
+                      </svg>
                     </div>
                     <h3 className="font-headline font-bold text-2xl mb-2">Cargando Modelo IA</h3>
                     <p className="text-amber-800 text-xs font-bold uppercase tracking-wider mb-6 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full inline-block">
@@ -363,13 +414,21 @@ export default function Home() {
                         onClick={initializeModel}
                         className="px-5 py-3 bg-stone-900 text-white font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 cursor-pointer"
                       >
-                        🔄 Reintentar
+                        <svg className="w-4 h-4 text-white flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.73-.73" />
+                        </svg>
+                        <span>Reintentar</span>
                       </button>
                       <button
                         onClick={terminateWorker}
                         className="px-5 py-3 bg-red-400 text-black font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 cursor-pointer"
                       >
-                        🚨 IA Reset
+                        <svg className="w-4 h-4 text-black flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14a2 2 0 0 0 1.73 3h16a2 2 0 0 0 1.73-3Z" />
+                          <line x1="12" y1="9" x2="12" y2="13" />
+                          <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                        <span>IA Reset</span>
                       </button>
                     </div>
                   </div>
@@ -405,28 +464,36 @@ export default function Home() {
                 {/* Header info */}
                 <div className="flex items-center justify-between border-b-3 border-black pb-4">
                   <div>
-                    <h2 className="font-headline font-extrabold text-3xl md:text-4xl text-black flex items-center gap-2 uppercase tracking-tight">
-                      📊 Análisis de Discurso
+                    <h2 className="font-headline font-extrabold text-3xl md:text-4xl text-black flex items-center gap-2.5 uppercase tracking-tight">
+                      <svg className="w-8 h-8 text-black flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10" />
+                        <line x1="12" y1="20" x2="12" y2="4" />
+                        <line x1="6" y1="20" x2="6" y2="14" />
+                      </svg>
+                      <span>Análisis de Discurso</span>
                     </h2>
                     <p className="text-stone-600 text-sm font-semibold mt-1">
                       Presentación: "Práctica de Oratoria Cicero"
                     </p>
                   </div>
-                  <div className="w-10 h-10 border-3 border-black rounded-lg bg-white flex items-center justify-center shadow-[3px_3px_0px_rgba(0,0,0,1)] text-lg" title="Feedback">
-                    📝
+                  <div className="w-10 h-10 border-3 border-black rounded-lg bg-white flex items-center justify-center shadow-[3px_3px_0px_rgba(0,0,0,1)] text-lg flex-shrink-0" title="Feedback">
+                    <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </svg>
                   </div>
                 </div>
 
                 {/* BLOCK 1: UPPER GRID (Score, metrics and tips) */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
                   
                   {/* 1.1 Limpieza de Oratoria Card (1/3 width) */}
                   <div className="border-3 border-black bg-white rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-between text-center relative overflow-hidden min-h-[350px] bg-[radial-gradient(#e5e5e5_1px,transparent_1px)] [background-size:16px_16px]">
-                    {/* Star Icon top right */}
-                    <span className="absolute top-4 right-4 text-xl">⭐</span>
-                    
-                    <h3 className="font-headline font-extrabold text-lg text-black uppercase tracking-wide mb-4">
-                      Limpieza de Oratoria
+                    <h3 className="font-headline font-extrabold text-lg text-black uppercase tracking-wide mb-4 flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5 text-amber-400 fill-amber-400 flex-shrink-0" viewBox="0 0 24 24" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                      <span>Limpieza de Oratoria</span>
                     </h3>
 
                     {/* SVG Circular Progress (Donut) */}
@@ -479,8 +546,11 @@ export default function Home() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       {/* Card 1: WPM */}
                       <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3">
-                        <div className="w-10 h-10 border-2 border-black rounded-lg bg-amber-100 flex items-center justify-center text-lg font-bold">
-                          🚀
+                        <div className="w-10 h-10 border-2 border-black rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 12a9 9 0 0 1 15-6.7L12 12Z" />
+                            <path d="m12 12 4-4" />
+                          </svg>
                         </div>
                         <div>
                           <span className="font-headline font-extrabold uppercase text-[10px] text-stone-500 block">
@@ -497,8 +567,11 @@ export default function Home() {
 
                       {/* Card 2: Duración */}
                       <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3">
-                        <div className="w-10 h-10 border-2 border-black rounded-lg bg-blue-100 flex items-center justify-center text-lg font-bold">
-                          ⏱️
+                        <div className="w-10 h-10 border-2 border-black rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                          </svg>
                         </div>
                         <div>
                           <span className="font-headline font-extrabold uppercase text-[10px] text-stone-500 block">
@@ -521,8 +594,14 @@ export default function Home() {
 
                       {/* Card 3: Puntuación general */}
                       <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center gap-3">
-                        <div className="w-10 h-10 border-2 border-black rounded-lg bg-emerald-100 flex items-center justify-center text-lg font-bold">
-                          🏆
+                        <div className="w-10 h-10 border-2 border-black rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                            <path d="M4 22h16" />
+                            <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
+                            <path d="M12 2a6 6 0 0 1 6 6v5a6 6 0 0 1-12 0V8a6 6 0 0 1 6-6Z" />
+                          </svg>
                         </div>
                         <div>
                           <span className="font-headline font-extrabold uppercase text-[10px] text-stone-500 block">
@@ -531,12 +610,23 @@ export default function Home() {
                           <span className="font-headline font-extrabold text-2xl text-black">
                             {(scoreResult.metrics.overallScore / 10).toFixed(1)}/10
                           </span>
-                          <div className="flex gap-0.5 text-amber-400 text-xs mt-0.5">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <span key={i}>
-                                {i < Math.round(scoreResult.metrics.overallScore / 20) ? '★' : '☆'}
-                              </span>
-                            ))}
+                          <div className="flex gap-0.5 mt-1">
+                            {Array.from({ length: 5 }).map((_, i) => {
+                              const filled = i < Math.round(scoreResult.metrics.overallScore / 20);
+                              return (
+                                <svg
+                                  key={i}
+                                  className={`w-3.5 h-3.5 ${filled ? 'text-amber-400 fill-amber-400' : 'text-stone-300 fill-none'}`}
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
@@ -549,8 +639,8 @@ export default function Home() {
                       <div className="absolute -right-2 -bottom-2 w-16 h-16 rounded-full border-3 border-black opacity-10" />
                       
                       {/* Mascot / Avatar box */}
-                      <div className="w-20 h-20 flex-shrink-0 border-3 border-black rounded-xl bg-white flex items-center justify-center text-4xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                        🐶
+                      <div className="w-20 h-20 flex-shrink-0 border-3 border-black rounded-xl bg-white flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)] overflow-hidden">
+                        <img src="/profe_guau.png" alt="Profe Guau" className="w-full h-full object-cover" />
                       </div>
 
                       {/* Feedback Text */}
@@ -570,12 +660,17 @@ export default function Home() {
                 </div>
 
                 {/* BLOCK 2: LOWER GRID (Filler breakdown & Transcription) */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
                   
                   {/* 2.1 Desglose de Muletillas (1/3 width) */}
                   <div className="border-3 border-black bg-white rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex flex-col gap-4">
-                    <h3 className="font-headline font-extrabold text-base text-black uppercase tracking-wide border-b-2 border-black pb-2 flex items-center gap-1.5">
-                      <span>📊</span> Desglose de Muletillas
+                    <h3 className="font-headline font-extrabold text-sm md:text-base text-black uppercase tracking-wide border-b-2 border-black pb-2 flex items-center gap-2 flex-wrap">
+                      <svg className="w-5 h-5 text-black flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10" />
+                        <line x1="12" y1="20" x2="12" y2="4" />
+                        <line x1="6" y1="20" x2="6" y2="14" />
+                      </svg>
+                      <span>Desglose de Muletillas</span>
                     </h3>
 
                     <div className="flex flex-col gap-3 flex-1 justify-start">
@@ -621,16 +716,29 @@ export default function Home() {
 
                   {/* 2.2 Transcripción Verbatim con doble resaltado (2/3 width) */}
                   <div className="md:col-span-2 border-3 border-black bg-white rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex flex-col min-h-[300px]">
-                    <div className="flex justify-between items-center border-b-2 border-black pb-3 mb-4">
-                      <h3 className="font-headline font-extrabold text-base text-black uppercase tracking-wide flex items-center gap-1.5">
-                        <span>📝</span> Transcripción del Discurso
+                    <div className="flex justify-between items-center border-b-2 border-black pb-3 mb-4 flex-wrap gap-2">
+                      <h3 className="font-headline font-extrabold text-sm md:text-base text-black uppercase tracking-wide flex items-center gap-2 flex-wrap">
+                        <svg className="w-5 h-5 text-black flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                          <line x1="16" y1="13" x2="8" y2="13" />
+                          <line x1="16" y1="17" x2="8" y2="17" />
+                        </svg>
+                        <span>Transcripción del Discurso</span>
                       </h3>
                       <div className="flex gap-2">
-                        <button className="w-8 h-8 border-2 border-black bg-white hover:bg-stone-100 rounded flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] text-xs cursor-pointer" title="Descargar">
-                          📥
+                        <button className="w-8 h-8 border-2 border-black bg-white hover:bg-stone-100 rounded flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] cursor-pointer" title="Descargar">
+                          <svg className="w-4 h-4 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </svg>
                         </button>
-                        <button className="w-8 h-8 border-2 border-black bg-white hover:bg-stone-100 rounded flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] text-xs cursor-pointer" title="Compartir">
-                          🔗
+                        <button className="w-8 h-8 border-2 border-black bg-white hover:bg-stone-100 rounded flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] cursor-pointer" title="Compartir">
+                          <svg className="w-4 h-4 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                          </svg>
                         </button>
                       </div>
                     </div>
