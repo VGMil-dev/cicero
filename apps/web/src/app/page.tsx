@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { FakeAudioModelBootstrap, FakeAudioRecorder } from '../core/ports/audio/mocks';
+import { FakeAudioModelBootstrap, FakeAudioRecorder, FakeAudioDecoder } from '../core/ports/audio/mocks';
 import { WorkerAudioModelBootstrap } from '../core/adapters/audio/WorkerAudioModelBootstrap';
 import { BrowserMediaRecorder } from '../core/adapters/audio/BrowserMediaRecorder';
 import { BrowserAudioDecoder } from '../core/adapters/audio/BrowserAudioDecoder';
@@ -42,8 +42,11 @@ export default function Home() {
   }, [useRealImplementation]);
 
   const decoder = useMemo(() => {
-    return new BrowserAudioDecoder();
-  }, []);
+    if (useRealImplementation) {
+      return new BrowserAudioDecoder();
+    }
+    return new FakeAudioDecoder();
+  }, [useRealImplementation]);
 
   const analyzer = useMemo(() => {
     return new FakeAudioAnalyzer({
