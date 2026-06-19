@@ -548,8 +548,9 @@ export default function Home() {
                       <div className="border-3 border-black bg-white rounded-xl p-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex flex-col items-center text-center gap-2.5 min-w-0">
                         <div className="w-10 h-10 border-2 border-black rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
                           <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 12a9 9 0 0 1 15-6.7L12 12Z" />
-                            <path d="m12 12 4-4" />
+                            <path d="M4 15a8 8 0 1 1 16 0" />
+                            <line x1="12" y1="14" x2="15" y2="9" />
+                            <circle cx="12" cy="14" r="1" />
                           </svg>
                         </div>
                         <div className="flex flex-col gap-0.5 min-w-0 w-full">
