@@ -74,18 +74,47 @@ export class TransformersEngine {
         options: {
           chunk_length_s: number;
           stride_length_s: number;
-          return_timestamps: string;
+          return_timestamps: boolean | string;
         }
       ) => Promise<unknown>;
-      const response = await pipelineFn(audioData, {
-        chunk_length_s: 30,
-        stride_length_s: 5,
-        return_timestamps: 'word',
-      });
+
+      let response: unknown;
+      let fallbackToSegmentTimestamps = false;
+
+      try {
+        // 1. Intentar con 'word' para obtener timestamps a nivel de palabra reales si el modelo los soporta
+        response = await pipelineFn(audioData, {
+          chunk_length_s: 30,
+          stride_length_s: 5,
+          return_timestamps: 'word',
+        });
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (message.includes('cross attentions') || message.includes('output_attentions')) {
+          console.warn('El modelo ONNX no soporta timestamps a nivel de palabra directamente. Aplicando fallback de interpolación sobre segmentos.');
+          fallbackToSegmentTimestamps = true;
+        } else {
+          throw error;
+        }
+      }
+
+      if (fallbackToSegmentTimestamps) {
+        try {
+          // 2. Fallback: solicitar timestamps a nivel de segmento (que no requieren cross-attention)
+          response = await pipelineFn(audioData, {
+            chunk_length_s: 30,
+            stride_length_s: 5,
+            return_timestamps: true,
+          });
+        } catch (fallbackError: unknown) {
+          const message = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+          throw new Error(`Inference execution failed on fallback: ${message}`);
+        }
+      }
 
       const output = (Array.isArray(response) ? response[0] : response) as {
         text: string;
-        chunks?: WhisperPipelineChunk[];
+        chunks?: { text: string; timestamp: [number, number] | null }[];
       };
 
       if (!output || typeof output.text !== 'string') {
@@ -94,21 +123,47 @@ export class TransformersEngine {
 
       const text: string = output.text;
       const rawChunks = output.chunks || [];
-      
-      const chunks: RawAudioChunk[] = rawChunks.map((chunk) => {
-        const word = typeof chunk.text === 'string' ? chunk.text : '';
-        const start = Array.isArray(chunk.timestamp) && typeof chunk.timestamp[0] === 'number'
-          ? chunk.timestamp[0]
-          : 0;
-        const end = Array.isArray(chunk.timestamp) && typeof chunk.timestamp[1] === 'number'
-          ? chunk.timestamp[1]
-          : start;
-        return {
-          word,
-          start,
-          end,
-        };
-      });
+      const chunks: RawAudioChunk[] = [];
+
+      if (fallbackToSegmentTimestamps) {
+        // Interpolar las palabras dentro de cada segmento
+        for (const segment of rawChunks) {
+          const segmentText = segment.text || '';
+          const words = segmentText.trim().split(/\s+/).filter(Boolean);
+          if (words.length === 0) continue;
+
+          // Si el segmento no tiene timestamps válidos, aproximamos sobre la duración total
+          const start = (segment.timestamp && typeof segment.timestamp[0] === 'number') ? segment.timestamp[0] : 0;
+          const end = (segment.timestamp && typeof segment.timestamp[1] === 'number') ? segment.timestamp[1] : start + 2;
+          
+          const duration = end - start;
+          const wordDuration = duration / words.length;
+
+          for (let i = 0; i < words.length; i++) {
+            chunks.push({
+              word: words[i],
+              start: start + i * wordDuration,
+              end: start + (i + 1) * wordDuration,
+            });
+          }
+        }
+      } else {
+        // Procesar la respuesta word-level original
+        for (const chunk of rawChunks) {
+          const word = typeof chunk.text === 'string' ? chunk.text : '';
+          const start = Array.isArray(chunk.timestamp) && typeof chunk.timestamp[0] === 'number'
+            ? chunk.timestamp[0]
+            : 0;
+          const end = Array.isArray(chunk.timestamp) && typeof chunk.timestamp[1] === 'number'
+            ? chunk.timestamp[1]
+            : start;
+          chunks.push({
+            word,
+            start,
+            end,
+          });
+        }
+      }
 
       return {
         text,
