@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { FakeAudioModelBootstrap, FakeAudioRecorder, FakeAudioDecoder } from '../core/ports/audio/mocks';
+import { FakeAudioModelBootstrap, FakeAudioRecorder, FakeAudioDecoder, FakeAudioAnalyzer } from '../core/ports/audio/mocks';
 import { WorkerAudioModelBootstrap } from '../core/adapters/audio/WorkerAudioModelBootstrap';
 import { BrowserMediaRecorder } from '../core/adapters/audio/BrowserMediaRecorder';
 import { BrowserAudioDecoder } from '../core/adapters/audio/BrowserAudioDecoder';
-import { FakeAudioAnalyzer } from '../core/ports/audio/mocks/FakeAudioAnalyzer';
+import { TransformersSpeechAdapter } from '../core/adapters/audio/TransformersSpeechAdapter';
 import { CalculateScoreUseCase } from '../core/usecases/CalculateScoreUseCase';
 import { useAudioCapture } from '../hooks/useAudioCapture';
 
@@ -49,10 +49,13 @@ export default function Home() {
   }, [useRealImplementation]);
 
   const analyzer = useMemo(() => {
+    if (useRealImplementation) {
+      return new TransformersSpeechAdapter(bootstrap, decoder);
+    }
     return new FakeAudioAnalyzer({
-      delayMs: useRealImplementation ? 2000 : 1000,
+      delayMs: 1000,
     });
-  }, [useRealImplementation]);
+  }, [useRealImplementation, bootstrap, decoder]);
 
   const calculateScoreUseCase = useMemo(() => {
     return new CalculateScoreUseCase();
@@ -248,7 +251,7 @@ export default function Home() {
 
               {/* CARD CONTENT */}
               <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center p-4">
-                
+
                 {/* 1. STATE: IDLE */}
                 {state === 'idle' && (
                   <div className="max-w-md">
@@ -302,7 +305,7 @@ export default function Home() {
                         {progress?.progress || 0}%
                       </span>
                     </div>
-                    
+
                     <p className="text-stone-600 mt-4 text-xs font-semibold italic max-w-sm mx-auto">
                       {progress?.message || 'Descargando archivos del modelo en IndexedDB y montando Web Worker...'}
                     </p>
@@ -313,7 +316,7 @@ export default function Home() {
                 {state === 'ready' && (
                   <div className="max-w-md">
                     <h3 className="font-headline font-bold text-3xl mb-4 text-black">¡Modelo de Voz Listo!</h3>
-                    
+
                     <p className="text-stone-600 mb-8 text-sm">
                       El modelo de IA está completamente cargado en memoria local. Presiona el botón para iniciar la captura de voz de manera 100% privada.
                     </p>
@@ -398,7 +401,7 @@ export default function Home() {
                       </svg>
                     </div>
                     <h3 className="font-headline font-bold text-2xl mb-2 text-stone-900">Se produjo un error</h3>
-                    
+
                     {/* Error Box */}
                     <div className="border-2 border-black bg-rose-50 text-left p-4 rounded-xl mb-6 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                       <p className="font-headline font-bold text-xs uppercase text-red-600 mb-1">
@@ -486,7 +489,7 @@ export default function Home() {
 
                 {/* BLOCK 1: UPPER GRID (Score, metrics and tips) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-                  
+
                   {/* 1.1 Limpieza de Oratoria Card (1/3 width) */}
                   <div className="border-3 border-black bg-white rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-between text-center relative overflow-hidden min-h-[350px] bg-[radial-gradient(#e5e5e5_1px,transparent_1px)] [background-size:16px_16px]">
                     <h3 className="font-headline font-extrabold text-lg text-black uppercase tracking-wide mb-4 flex items-center justify-center gap-2">
@@ -659,12 +662,12 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                  
+
                 </div>
 
                 {/* BLOCK 2: LOWER GRID (Filler breakdown & Transcription) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-                  
+
                   {/* 2.1 Desglose de Muletillas (1/3 width) */}
                   <div className="border-3 border-black bg-white rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] flex flex-col gap-4">
                     <h3 className="font-headline font-extrabold text-sm md:text-base text-black uppercase tracking-wide border-b-2 border-black pb-2 flex items-center gap-2 flex-wrap">
