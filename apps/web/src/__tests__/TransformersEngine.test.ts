@@ -51,7 +51,9 @@ describe('TransformersEngine Unit Tests', () => {
     expect(mockPipeline).toHaveBeenCalledWith(audioData, {
       chunk_length_s: 30,
       stride_length_s: 5,
-      return_timestamps: 'word',
+      return_timestamps: true,
+      language: 'spanish',
+      task: 'transcribe',
     });
 
     expect(result).toEqual({

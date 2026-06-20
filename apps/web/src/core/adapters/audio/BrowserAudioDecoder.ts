@@ -22,6 +22,7 @@ export class BrowserAudioDecoder implements IAudioDecoder {
   constructor(
     OfflineAudioContextClass: typeof OfflineAudioContext | null = (
       typeof globalThis !== 'undefined'
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? (globalThis.OfflineAudioContext || (globalThis as any).webkitOfflineAudioContext)
         : null
     )

@@ -44,7 +44,7 @@ export class TransformersEngine {
     modelName: string,
     options: {
       device: 'webgpu' | 'wasm';
-      dtype: 'q8' | 'fp32';
+      dtype: 'q4' | 'q8' | 'fp32';
       progress_callback?: (data: TransformersProgressData) => void;
     }
   ): Promise<void> {
@@ -74,18 +74,33 @@ export class TransformersEngine {
         options: {
           chunk_length_s: number;
           stride_length_s: number;
-          return_timestamps: string;
+          return_timestamps: boolean | string;
+          language?: string;
+          task?: string;
         }
       ) => Promise<unknown>;
-      const response = await pipelineFn(audioData, {
-        chunk_length_s: 30,
-        stride_length_s: 5,
-        return_timestamps: 'word',
-      });
+
+      let response: unknown;
+      // El modelo ONNX de CrisperWhisper no soporta timestamps por palabra directamente
+      // (falta cross-attention en el grafo exportado). Usamos directamente nivel de segmento e interpolamos.
+      const useSegmentInterpolation = true;
+
+      try {
+        response = await pipelineFn(audioData, {
+          chunk_length_s: 30,
+          stride_length_s: 5,
+          return_timestamps: true,
+          language: 'spanish',
+          task: 'transcribe',
+        });
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`Inference execution failed: ${message}`);
+      }
 
       const output = (Array.isArray(response) ? response[0] : response) as {
         text: string;
-        chunks?: WhisperPipelineChunk[];
+        chunks?: { text: string; timestamp: [number, number] | null }[];
       };
 
       if (!output || typeof output.text !== 'string') {
@@ -94,21 +109,47 @@ export class TransformersEngine {
 
       const text: string = output.text;
       const rawChunks = output.chunks || [];
-      
-      const chunks: RawAudioChunk[] = rawChunks.map((chunk) => {
-        const word = typeof chunk.text === 'string' ? chunk.text : '';
-        const start = Array.isArray(chunk.timestamp) && typeof chunk.timestamp[0] === 'number'
-          ? chunk.timestamp[0]
-          : 0;
-        const end = Array.isArray(chunk.timestamp) && typeof chunk.timestamp[1] === 'number'
-          ? chunk.timestamp[1]
-          : start;
-        return {
-          word,
-          start,
-          end,
-        };
-      });
+      const chunks: RawAudioChunk[] = [];
+
+      if (useSegmentInterpolation) {
+        // Interpolar las palabras dentro de cada segmento
+        for (const segment of rawChunks) {
+          const segmentText = segment.text || '';
+          const words = segmentText.trim().split(/\s+/).filter(Boolean);
+          if (words.length === 0) continue;
+
+          // Si el segmento no tiene timestamps válidos, aproximamos sobre la duración total
+          const start = (segment.timestamp && typeof segment.timestamp[0] === 'number') ? segment.timestamp[0] : 0;
+          const end = (segment.timestamp && typeof segment.timestamp[1] === 'number') ? segment.timestamp[1] : start + 2;
+          
+          const duration = end - start;
+          const wordDuration = duration / words.length;
+
+          for (let i = 0; i < words.length; i++) {
+            chunks.push({
+              word: words[i],
+              start: start + i * wordDuration,
+              end: start + (i + 1) * wordDuration,
+            });
+          }
+        }
+      } else {
+        // Procesar la respuesta word-level original
+        for (const chunk of rawChunks) {
+          const word = typeof chunk.text === 'string' ? chunk.text : '';
+          const start = Array.isArray(chunk.timestamp) && typeof chunk.timestamp[0] === 'number'
+            ? chunk.timestamp[0]
+            : 0;
+          const end = Array.isArray(chunk.timestamp) && typeof chunk.timestamp[1] === 'number'
+            ? chunk.timestamp[1]
+            : start;
+          chunks.push({
+            word,
+            start,
+            end,
+          });
+        }
+      }
 
       return {
         text,

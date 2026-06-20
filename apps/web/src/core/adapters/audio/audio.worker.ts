@@ -94,7 +94,7 @@ async function loadModel(modelName: string, dtype: string): Promise<void> {
     engineInstance = new TransformersEngine();
     await engineInstance.initialize(modelName, {
       device: 'webgpu',
-      dtype: dtype as 'q8' | 'fp32',
+      dtype: dtype as 'q4' | 'q8' | 'fp32',
       progress_callback: progressCallback,
     });
 
@@ -121,7 +121,7 @@ async function loadModel(modelName: string, dtype: string): Promise<void> {
       engineInstance = new TransformersEngine();
       await engineInstance.initialize(modelName, {
         device: 'wasm',
-        dtype: dtype as 'q8' | 'fp32',
+        dtype: dtype as 'q4' | 'q8' | 'fp32',
         progress_callback: (data: ProgressData) => {
           if (data.status === 'progress' || data.status === 'downloading') {
             const progressValue = typeof data.progress === 'number' ? Math.round(data.progress) : 0;
@@ -175,9 +175,9 @@ self.addEventListener('message', async (event: MessageEvent<MainThreadMessageDTO
   switch (message.type) {
     case 'LOAD_MODEL': {
       const modelName = message.payload?.modelName || 'onnx-community/CrisperWhisper-ONNX';
-      // Forzar q8 o q4 por defecto para evitar OOM, o fp32 si se desactiva explícitamente la cuantización
+      // Forzar q4 por defecto para evitar OOM, o fp32 si se desactiva explícitamente la cuantización
       const quantized = message.payload?.quantized !== false;
-      const dtype = quantized ? 'q8' : 'fp32';
+      const dtype = quantized ? 'q4' : 'fp32';
 
       // Comprobación de Singleton
       if (engineInstance && currentModelName === modelName && currentDtype === dtype) {
