@@ -44,7 +44,7 @@ export class TransformersEngine {
     modelName: string,
     options: {
       device: 'webgpu' | 'wasm';
-      dtype: 'q8' | 'fp32';
+      dtype: 'q4' | 'q8' | 'fp32';
       progress_callback?: (data: TransformersProgressData) => void;
     }
   ): Promise<void> {
@@ -81,41 +81,21 @@ export class TransformersEngine {
       ) => Promise<unknown>;
 
       let response: unknown;
-      let fallbackToSegmentTimestamps = false;
+      // El modelo ONNX de CrisperWhisper no soporta timestamps por palabra directamente
+      // (falta cross-attention en el grafo exportado). Usamos directamente nivel de segmento e interpolamos.
+      const useSegmentInterpolation = true;
 
       try {
-        // 1. Intentar con 'word' para obtener timestamps a nivel de palabra reales si el modelo los soporta
         response = await pipelineFn(audioData, {
           chunk_length_s: 30,
           stride_length_s: 5,
-          return_timestamps: 'word',
+          return_timestamps: true,
           language: 'spanish',
           task: 'transcribe',
         });
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
-        if (message.includes('cross attentions') || message.includes('output_attentions')) {
-          console.warn('El modelo ONNX no soporta timestamps a nivel de palabra directamente. Aplicando fallback de interpolación sobre segmentos.');
-          fallbackToSegmentTimestamps = true;
-        } else {
-          throw error;
-        }
-      }
-
-      if (fallbackToSegmentTimestamps) {
-        try {
-          // 2. Fallback: solicitar timestamps a nivel de segmento (que no requieren cross-attention)
-          response = await pipelineFn(audioData, {
-            chunk_length_s: 30,
-            stride_length_s: 5,
-            return_timestamps: true,
-            language: 'spanish',
-            task: 'transcribe',
-          });
-        } catch (fallbackError: unknown) {
-          const message = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
-          throw new Error(`Inference execution failed on fallback: ${message}`);
-        }
+        throw new Error(`Inference execution failed: ${message}`);
       }
 
       const output = (Array.isArray(response) ? response[0] : response) as {
@@ -131,7 +111,7 @@ export class TransformersEngine {
       const rawChunks = output.chunks || [];
       const chunks: RawAudioChunk[] = [];
 
-      if (fallbackToSegmentTimestamps) {
+      if (useSegmentInterpolation) {
         // Interpolar las palabras dentro de cada segmento
         for (const segment of rawChunks) {
           const segmentText = segment.text || '';
