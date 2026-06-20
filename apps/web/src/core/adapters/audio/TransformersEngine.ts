@@ -75,6 +75,8 @@ export class TransformersEngine {
           chunk_length_s: number;
           stride_length_s: number;
           return_timestamps: boolean | string;
+          language?: string;
+          task?: string;
         }
       ) => Promise<unknown>;
 
@@ -87,6 +89,8 @@ export class TransformersEngine {
           chunk_length_s: 30,
           stride_length_s: 5,
           return_timestamps: 'word',
+          language: 'spanish',
+          task: 'transcribe',
         });
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
@@ -105,6 +109,8 @@ export class TransformersEngine {
             chunk_length_s: 30,
             stride_length_s: 5,
             return_timestamps: true,
+            language: 'spanish',
+            task: 'transcribe',
           });
         } catch (fallbackError: unknown) {
           const message = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
