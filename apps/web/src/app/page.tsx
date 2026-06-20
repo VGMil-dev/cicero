@@ -476,7 +476,7 @@ export default function Home() {
                       <span>Análisis de Discurso</span>
                     </h2>
                     <p className="text-stone-600 text-sm font-semibold mt-1">
-                      Presentación: "Práctica de Oratoria Cicero"
+                      Presentación: &quot;Práctica de Oratoria Cicero&quot;
                     </p>
                   </div>
                   <div className="w-10 h-10 border-3 border-black rounded-lg bg-white flex items-center justify-center shadow-[3px_3px_0px_rgba(0,0,0,1)] text-lg flex-shrink-0" title="Feedback">
@@ -692,7 +692,7 @@ export default function Home() {
                               <div key={word} className="flex flex-col gap-1">
                                 <div className="flex justify-between items-center text-xs font-bold">
                                   <span className="bg-[#DFFF00] border border-black px-1.5 py-0.5 rounded text-[10px] font-extrabold">
-                                    "{word}"
+                                    &quot;{word}&quot;
                                   </span>
                                   <span className="text-stone-700">{count} veces</span>
                                 </div>

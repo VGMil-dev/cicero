@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BrowserAudioDecoder } from '../core/adapters/audio/BrowserAudioDecoder';
 import { CaptureError } from '../core/ports/audio/CaptureError';
 

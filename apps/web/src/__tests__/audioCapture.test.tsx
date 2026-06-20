@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAudioCapture } from '../hooks/useAudioCapture';
 import { FakeAudioModelBootstrap, FakeAudioRecorder } from '../core/ports/audio/mocks';
