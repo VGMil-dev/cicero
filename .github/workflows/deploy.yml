@@ -51,6 +51,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          preCommands: pnpm exec wrangler pages project create cicero-web --production-branch=main || true
           command: pages deploy apps/web/out --project-name=cicero-web
           packageManager: pnpm
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
