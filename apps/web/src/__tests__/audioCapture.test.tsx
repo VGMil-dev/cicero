@@ -1,23 +1,65 @@
-import { renderHook, act } from '@testing-library/react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAudioCapture } from '../hooks/useAudioCapture';
 import { FakeAudioModelBootstrap, FakeAudioRecorder } from '../core/ports/audio/mocks';
 
 describe('useAudioCapture Hook', () => {
+  let bootstrap: FakeAudioModelBootstrap;
+  let recorder: FakeAudioRecorder;
+  let decoder: any;
+  let analyzer: any;
+  let calculateScoreUseCase: any;
+
+  beforeEach(() => {
+    bootstrap = new FakeAudioModelBootstrap({ progressInterval: 10 });
+    recorder = new FakeAudioRecorder();
+    decoder = {
+      decodeTo16kHzMono: jest.fn().mockResolvedValue(new Float32Array([0.1, 0.2])),
+    };
+    analyzer = {
+      analyzeAudio: jest.fn().mockResolvedValue({
+        text: 'Hola eh bueno',
+        chunks: [
+          { word: 'Hola', start: 0.1, end: 0.5 },
+          { word: 'eh', start: 0.6, end: 1.0 },
+          { word: 'bueno', start: 1.1, end: 1.5 },
+        ],
+      }),
+    };
+    calculateScoreUseCase = {
+      execute: jest.fn().mockReturnValue({
+        metrics: {
+          overallScore: 66,
+          fillerWordsCount: 2,
+          wordsPerMinute: 120,
+          fillerWordsBreakdown: { eh: 1, bueno: 1 },
+        },
+        chunks: [
+          { word: 'Hola', start: 0.1, end: 0.5, isFillerWord: false },
+          { word: 'eh', start: 0.6, end: 1.0, isFillerWord: true },
+          { word: 'bueno', start: 1.1, end: 1.5, isFillerWord: true },
+        ],
+      }),
+    };
+  });
+
   it('should start in idle state', () => {
-    const bootstrap = new FakeAudioModelBootstrap();
-    const recorder = new FakeAudioRecorder();
-    const { result } = renderHook(() => useAudioCapture(bootstrap, recorder));
+    const { result } = renderHook(() =>
+      useAudioCapture(bootstrap, recorder, decoder, analyzer, calculateScoreUseCase)
+    );
 
     expect(result.current.state).toBe('idle');
     expect(result.current.progress).toBeNull();
     expect(result.current.error).toBeNull();
     expect(result.current.audioBlob).toBeNull();
+    expect(result.current.isAnalyzing).toBe(false);
+    expect(result.current.scoreResult).toBeNull();
   });
 
   it('should initialize model successfully', async () => {
-    const bootstrap = new FakeAudioModelBootstrap({ progressInterval: 10 });
-    const recorder = new FakeAudioRecorder();
-    const { result } = renderHook(() => useAudioCapture(bootstrap, recorder));
+    const { result } = renderHook(() =>
+      useAudioCapture(bootstrap, recorder, decoder, analyzer, calculateScoreUseCase)
+    );
 
     let initPromise: Promise<void>;
     act(() => {
@@ -35,9 +77,10 @@ describe('useAudioCapture Hook', () => {
   });
 
   it('should fail model initialization when shouldFail is true', async () => {
-    const bootstrap = new FakeAudioModelBootstrap({ shouldFail: true, progressInterval: 10 });
-    const recorder = new FakeAudioRecorder();
-    const { result } = renderHook(() => useAudioCapture(bootstrap, recorder));
+    bootstrap = new FakeAudioModelBootstrap({ shouldFail: true, progressInterval: 10 });
+    const { result } = renderHook(() =>
+      useAudioCapture(bootstrap, recorder, decoder, analyzer, calculateScoreUseCase)
+    );
 
     let initPromise: Promise<void>;
     act(() => {
@@ -57,10 +100,19 @@ describe('useAudioCapture Hook', () => {
     expect(result.current.error?.code).toBe('MODEL_LOAD_FAILED');
   });
 
-  it('should transition to recording and stop with a blob', async () => {
-    const bootstrap = new FakeAudioModelBootstrap({ progressInterval: 10 });
-    const recorder = new FakeAudioRecorder({ grantPermission: true });
-    const { result } = renderHook(() => useAudioCapture(bootstrap, recorder));
+  it('should transition to recording and trigger decoding, analysis and scoring when stopRecording is called', async () => {
+    recorder = new FakeAudioRecorder({ grantPermission: true });
+
+    // Diferir la resolución de la decodificación para poder capturar el estado intermedio isAnalyzing = true
+    let resolveDecoding: (val: Float32Array) => void = () => {};
+    const decodingPromise = new Promise<Float32Array>((resolve) => {
+      resolveDecoding = resolve;
+    });
+    decoder.decodeTo16kHzMono.mockReturnValue(decodingPromise);
+
+    const { result } = renderHook(() =>
+      useAudioCapture(bootstrap, recorder, decoder, analyzer, calculateScoreUseCase)
+    );
 
     await act(async () => {
       await result.current.initializeModel();
@@ -74,19 +126,36 @@ describe('useAudioCapture Hook', () => {
 
     expect(result.current.state).toBe('recording');
 
-    await act(async () => {
-      await result.current.stopRecording();
+    let stopPromise: Promise<void>;
+    act(() => {
+      stopPromise = result.current.stopRecording();
     });
 
-    expect(result.current.state).toBe('ready');
+    // Esperar a que isAnalyzing cambie a true usando waitFor de manera robusta
+    await waitFor(() => {
+      expect(result.current.isAnalyzing).toBe(true);
+    });
+
+    // Resolver el decoder para que finalice el flujo completo
+    await act(async () => {
+      resolveDecoding(new Float32Array([0.1, 0.2]));
+      await stopPromise;
+    });
+
+    expect(result.current.isAnalyzing).toBe(false);
+    expect(decoder.decodeTo16kHzMono).toHaveBeenCalled();
+    expect(analyzer.analyzeAudio).toHaveBeenCalled();
+    expect(calculateScoreUseCase.execute).toHaveBeenCalled();
+    expect(result.current.scoreResult).not.toBeNull();
+    expect(result.current.scoreResult?.metrics.overallScore).toBe(66);
     expect(result.current.audioBlob).toBeInstanceOf(Blob);
-    expect(result.current.audioBlob?.type).toBe('audio/webm');
   });
 
   it('should fail startRecording if permission is denied', async () => {
-    const bootstrap = new FakeAudioModelBootstrap({ progressInterval: 10 });
-    const recorder = new FakeAudioRecorder({ grantPermission: false });
-    const { result } = renderHook(() => useAudioCapture(bootstrap, recorder));
+    recorder = new FakeAudioRecorder({ grantPermission: false });
+    const { result } = renderHook(() =>
+      useAudioCapture(bootstrap, recorder, decoder, analyzer, calculateScoreUseCase)
+    );
 
     await act(async () => {
       await result.current.initializeModel();
@@ -101,9 +170,10 @@ describe('useAudioCapture Hook', () => {
   });
 
   it('should fail startRecording if recording start fails', async () => {
-    const bootstrap = new FakeAudioModelBootstrap({ progressInterval: 10 });
-    const recorder = new FakeAudioRecorder({ shouldFailOnStart: true });
-    const { result } = renderHook(() => useAudioCapture(bootstrap, recorder));
+    recorder = new FakeAudioRecorder({ shouldFailOnStart: true });
+    const { result } = renderHook(() =>
+      useAudioCapture(bootstrap, recorder, decoder, analyzer, calculateScoreUseCase)
+    );
 
     await act(async () => {
       await result.current.initializeModel();
@@ -117,14 +187,63 @@ describe('useAudioCapture Hook', () => {
     expect(result.current.error?.code).toBe('RECORDING_FAILED');
   });
 
-  it('should call bootstrap.terminate and reset state to idle when calling terminateWorker', () => {
-    const bootstrap = new FakeAudioModelBootstrap({ progressInterval: 10 });
-    const recorder = new FakeAudioRecorder();
-    const { result } = renderHook(() => useAudioCapture(bootstrap, recorder));
+  it('should handle decoding failure and transition to error state', async () => {
+    recorder = new FakeAudioRecorder({ grantPermission: true });
+    decoder.decodeTo16kHzMono.mockRejectedValue(new Error('Decoding error'));
 
-    let initPromise: Promise<void>;
+    const { result } = renderHook(() =>
+      useAudioCapture(bootstrap, recorder, decoder, analyzer, calculateScoreUseCase)
+    );
+
+    await act(async () => {
+      await result.current.initializeModel();
+    });
+
+    await act(async () => {
+      await result.current.startRecording();
+    });
+
+    await act(async () => {
+      await result.current.stopRecording();
+    });
+
+    expect(result.current.state).toBe('error');
+    expect(result.current.error?.code).toBe('DECODING_FAILED');
+    expect(result.current.error?.message).toBe('Decoding error');
+  });
+
+  it('should handle analysis failure and transition to error state', async () => {
+    recorder = new FakeAudioRecorder({ grantPermission: true });
+    analyzer.analyzeAudio.mockRejectedValue(new Error('ASR analysis error'));
+
+    const { result } = renderHook(() =>
+      useAudioCapture(bootstrap, recorder, decoder, analyzer, calculateScoreUseCase)
+    );
+
+    await act(async () => {
+      await result.current.initializeModel();
+    });
+
+    await act(async () => {
+      await result.current.startRecording();
+    });
+
+    await act(async () => {
+      await result.current.stopRecording();
+    });
+
+    expect(result.current.state).toBe('error');
+    expect(result.current.error?.code).toBe('ANALYSIS_FAILED');
+    expect(result.current.error?.message).toBe('ASR analysis error');
+  });
+
+  it('should call bootstrap.terminate and reset state to idle when calling terminateWorker', () => {
+    const { result } = renderHook(() =>
+      useAudioCapture(bootstrap, recorder, decoder, analyzer, calculateScoreUseCase)
+    );
+
     act(() => {
-      initPromise = result.current.initializeModel();
+      void result.current.initializeModel();
     });
 
     expect(result.current.state).toBe('loading-model');
@@ -140,6 +259,7 @@ describe('useAudioCapture Hook', () => {
     expect(result.current.progress).toBeNull();
     expect(result.current.error).toBeNull();
     expect(result.current.audioBlob).toBeNull();
+    expect(result.current.isAnalyzing).toBe(false);
+    expect(result.current.scoreResult).toBeNull();
   });
 });
-

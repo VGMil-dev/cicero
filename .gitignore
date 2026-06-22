@@ -77,4 +77,4 @@ next-env.d.ts
 # Agentes de IA
 # ========================
 .agents/
-
+.plans/

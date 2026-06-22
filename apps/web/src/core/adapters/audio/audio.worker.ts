@@ -1,11 +1,12 @@
-import { pipeline, env } from '@huggingface/transformers';
+import { env } from '@huggingface/transformers';
 import { MainThreadMessageDTO, WorkerMessageDTO } from '../../ports/audio/types';
+import { TransformersEngine } from './TransformersEngine';
 
 // Deshabilitar la búsqueda de modelos locales en el sistema de archivos del servidor
 env.allowLocalModels = false;
 
 // Variables globales para el patrón Singleton del modelo
-let pipelineInstance: unknown = null;
+let engineInstance: TransformersEngine | null = null;
 let currentModelName: string | null = null;
 let currentDtype: string | null = null;
 
@@ -90,9 +91,10 @@ async function loadModel(modelName: string, dtype: string): Promise<void> {
     };
     self.postMessage(progressMessage);
 
-    pipelineInstance = await pipeline('automatic-speech-recognition', modelName, {
+    engineInstance = new TransformersEngine();
+    await engineInstance.initialize(modelName, {
       device: 'webgpu',
-      dtype: dtype as 'q8' | 'fp32',
+      dtype: dtype as 'q4' | 'q8' | 'fp32',
       progress_callback: progressCallback,
     });
 
@@ -116,9 +118,10 @@ async function loadModel(modelName: string, dtype: string): Promise<void> {
     self.postMessage(fallbackProgressMessage);
 
     try {
-      pipelineInstance = await pipeline('automatic-speech-recognition', modelName, {
+      engineInstance = new TransformersEngine();
+      await engineInstance.initialize(modelName, {
         device: 'wasm',
-        dtype: dtype as 'q8' | 'fp32',
+        dtype: dtype as 'q4' | 'q8' | 'fp32',
         progress_callback: (data: ProgressData) => {
           if (data.status === 'progress' || data.status === 'downloading') {
             const progressValue = typeof data.progress === 'number' ? Math.round(data.progress) : 0;
@@ -172,12 +175,12 @@ self.addEventListener('message', async (event: MessageEvent<MainThreadMessageDTO
   switch (message.type) {
     case 'LOAD_MODEL': {
       const modelName = message.payload?.modelName || 'onnx-community/CrisperWhisper-ONNX';
-      // Forzar q8 o q4 por defecto para evitar OOM, o fp32 si se desactiva explícitamente la cuantización
+      // Forzar q4 por defecto para evitar OOM, o fp32 si se desactiva explícitamente la cuantización
       const quantized = message.payload?.quantized !== false;
-      const dtype = quantized ? 'q8' : 'fp32';
+      const dtype = quantized ? 'q4' : 'fp32';
 
       // Comprobación de Singleton
-      if (pipelineInstance && currentModelName === modelName && currentDtype === dtype) {
+      if (engineInstance && currentModelName === modelName && currentDtype === dtype) {
         self.postMessage({ type: 'READY' });
         return;
       }
@@ -185,9 +188,41 @@ self.addEventListener('message', async (event: MessageEvent<MainThreadMessageDTO
       await loadModel(modelName, dtype);
       break;
     }
+    case 'ANALYZE_AUDIO': {
+      if (!engineInstance) {
+        self.postMessage({
+          type: 'ERROR',
+          payload: {
+            code: 'ANALYSIS_FAILED',
+            message: 'Inference engine is not initialized. Send LOAD_MODEL message first.',
+          }
+        });
+        return;
+      }
+
+      try {
+        const audioData = message.payload;
+        const result = await engineInstance.infer(audioData);
+        self.postMessage({
+          type: 'ANALYSIS_SUCCESS',
+          payload: result,
+        });
+      } catch (err: unknown) {
+        const errorObj = err instanceof Error ? err : new Error(String(err));
+        self.postMessage({
+          type: 'ERROR',
+          payload: {
+            code: 'ANALYSIS_FAILED',
+            message: `Inference execution failed: ${errorObj.message}`,
+            stack: errorObj.stack,
+          }
+        });
+      }
+      break;
+    }
     case 'TERMINATE': {
       // Liberar recursos y cerrar el worker
-      pipelineInstance = null;
+      engineInstance = null;
       currentModelName = null;
       currentDtype = null;
       self.close();
