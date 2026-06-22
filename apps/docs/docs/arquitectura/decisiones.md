@@ -54,4 +54,21 @@ Para evitar que el desarrollo de la Interfaz de Usuario (Front-end) quede bloque
 - **Inyección de Dependencias**: La UI consume estas dependencias mediante inyección en Hooks o Stores. Cuando los adaptadores reales (Worker, MediaRecorder) estén listos en una Fase 2, se intercambiarán por los Fakes sin requerir **ninguna** modificación en el código de los componentes visuales de React.
 - **Gobernanza de Estado**: Los adaptadores (Fakes o Reales) deben ser fieles a su contrato. Si la interfaz no define un estado global, el adaptador no debe gestionarlo internamente, delegando esa orquestación a la capa de aplicación.
 
+## 🔑 Pivot de Inferencia: Gemini 3.5 Flash (BYOK & Resiliencia en Cliente)
+
+En la etapa de escalabilidad de **Cicero**, se identificó que la inferencia puramente local con Transformers.js y CrisperWhisper presentaba limitantes para audios largos (de 15 a 60 minutos):
+1.  **Límites de Hardware en Clientes:** Dispositivos móviles y computadoras de baja gama experimentaban bloqueos de pestaña y tiempos de procesamiento inviables (CPU al 100% durante varios minutos).
+2.  **Tiempos de Carga del Modelo:** Descargar ~50MB a 100MB de modelo ONNX penalizaba la primera experiencia de uso bajo conexiones inestables.
+
+Para resolver esto manteniendo el principio de **cero costo de servidor**, se decidió pivotar a **Google Gemini 3.5 Flash** mediante un esquema **BYOK (Bring Your Own Key)**:
+- **API Key del Cliente:** Cada estudiante introduce su clave gratuita de Google AI Studio, la cual se almacena localmente en `localStorage`. Las peticiones viajan directamente desde el navegador a la API de Google, sin intermediación de servidores propios.
+- **Segmentación Matemática a 3 Minutos:** Un audio de 60 minutos (a 16kHz 16-bit mono WAV) pesa ~115MB. Para evitar fallas de red en conexiones móviles y optimizar el procesamiento, el buffer PCM se fragmenta localmente en bloques de 3 minutos (~5.7MB por WAV).
+- **Subida Resumible (Resumable Upload):** Se implementa el protocolo en dos fases de Google Files API para soportar reconexiones y reanudaciones parciales.
+- **Caché en IndexedDB:** Cada fragmento WAV procesado se almacena temporalmente en IndexedDB. Si el proceso falla por red o límites de cuota (HTTP 429), el usuario no pierde su grabación y puede reanudarla desde el fragmento exacto donde falló, incluso cambiando la API Key en caliente.
+- **Concurrencia de Cola:** Las subidas se orquestan con un semáforo de concurrencia máxima de 3 para respetar los límites de la cuota gratuita (15 RPM) sin bloquear la UI.
+- **Limpieza Post-Inferencia:** Tras completarse la transcripción de un fragmento, se envía de inmediato un request HTTP `DELETE` a la Files API de Google para garantizar la privacidad y no acumular archivos en el almacenamiento temporal de Google (que expira a las 48h).
+- **Interpolación Temporal Lineal:** Para evitar el consumo excesivo de tokens de salida solicitando timestamps exactos por cada palabra a Gemini (lo que rompería el límite de 8192 tokens en audios largos), Gemini solo retorna el texto transcrito de cada segmento. En el cliente se interpolan linealmente los tiempos de las palabras dentro del segmento basándose en la duración del mismo, lo que preserva la funcionalidad de visualización y el cálculo del `CalculateScoreUseCase`.
+- **Patrón de Inyección Desacoplado:** El adaptador `GeminiSpeechAdapter` recibe un `apiKeyProvider: () => string | null` en su constructor, abstrayéndose por completo de la reactividad de React o de la persistencia directa en `localStorage`.
+
+
 
