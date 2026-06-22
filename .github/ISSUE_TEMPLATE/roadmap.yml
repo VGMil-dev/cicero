@@ -1,0 +1,118 @@
+name: Roadmap issue
+description: Crear epics, features, spikes y tech enablers con un formato estandar para el roadmap.
+title: "[Equipo] <titulo>"
+labels:
+  - enhancement
+body:
+  - type: dropdown
+    id: team
+    attributes:
+      label: Equipo
+      description: Selecciona el frente responsable principal.
+      options:
+        - Cross-team
+        - Architect
+        - Front
+        - Back
+        - DevSecOps
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Tipo
+      description: Clasifica la iniciativa dentro del roadmap.
+      options:
+        - Epic
+        - Feature
+        - Spike
+        - Tech Enabler
+    validations:
+      required: true
+
+  - type: dropdown
+    id: horizon
+    attributes:
+      label: Horizonte
+      description: Ubica la issue dentro de la etapa del roadmap.
+      options:
+        - Foundation
+        - MVP
+        - Hardening
+        - Post-MVP
+    validations:
+      required: true
+
+  - type: dropdown
+    id: delivery-mode
+    attributes:
+      label: Modo de entrega
+      description: Indica como se espera que entre esta pieza al flujo.
+      options:
+        - Mock First
+        - Integration Ready
+        - Production Ready
+    validations:
+      required: true
+
+  - type: textarea
+    id: doc-source
+    attributes:
+      label: Fuente documental
+      description: Enlaza o referencia los documentos de arquitectura, diseno o bitacora que originan la issue.
+      placeholder: |
+        - apps/docs/docs/arquitectura/casos-de-uso.md
+        - apps/docs/docs/arquitectura/componentes.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objetivo
+      description: Explica que se busca lograr y por que existe esta issue.
+      placeholder: Definir los contratos base del slice para habilitar trabajo paralelo entre equipos.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-result
+    attributes:
+      label: Resultado esperado
+      description: Describe el entregable o impacto principal.
+      placeholder: Interfaces, DTOs, estados y errores del flujo publicados y acordados.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Criterios de aceptacion
+      description: Lista concreta para saber cuando la issue se puede cerrar.
+      placeholder: |
+        - [ ] Existe definicion de `IAudioModelBootstrap`
+        - [ ] Existe definicion de `IAudioRecorder`
+        - [ ] Estan definidos los estados principales del flujo
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencias
+      description: Lista los issues, epics o decisiones bloqueantes.
+      placeholder: |
+        - Epic #3
+        - #4
+    validations:
+      required: false
+
+  - type: textarea
+    id: integration-notes
+    attributes:
+      label: Notas de integracion
+      description: Aclara riesgos, acoplamientos o acuerdos relevantes para otros equipos.
+      placeholder: Este issue desbloquea la UI del flujo y evita payloads incompatibles.
+    validations:
+      required: false

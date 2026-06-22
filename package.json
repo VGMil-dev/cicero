@@ -1,0 +1,31 @@
+{
+  "name": "cicero",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "dev:web": "pnpm --filter @cicero/web dev",
+    "dev:docs": "pnpm --filter @cicero/docs dev",
+    "test:web": "pnpm --filter @cicero/web test",
+    "test:watch": "pnpm --filter @cicero/web test --watch",
+    "build:web": "pnpm --filter @cicero/web build",
+    "build:docs": "pnpm --filter @cicero/docs build",
+    "typecheck:web": "pnpm --filter @cicero/web typecheck",
+    "typecheck:docs": "pnpm --filter @cicero/docs typecheck",
+    "clean": "pnpm dlx rimraf .turbo apps/web/.next apps/docs/.docusaurus node_modules/.cache/turbo"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "turbo": "^2.0.0",
+    "wrangler": "^3.99.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@9.1.0"
+}
