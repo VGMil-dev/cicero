@@ -8,54 +8,6 @@ import { BrowserAudioDecoder } from '../core/adapters/audio/BrowserAudioDecoder'
 import { TransformersSpeechAdapter } from '../core/adapters/audio/TransformersSpeechAdapter';
 import { CalculateScoreUseCase } from '../core/usecases/CalculateScoreUseCase';
 import { useAudioCapture } from '../hooks/useAudioCapture';
-import { useGeminiSettings } from '../hooks/useGeminiSettings';
-import { GeminiSettingsModal } from '../components/GeminiSettingsModal';
-import { GeminiSpeechAdapter } from '../core/adapters/audio/GeminiSpeechAdapter';
-import { IAudioModelBootstrap } from '../core/ports/audio/IAudioModelBootstrap';
-import { ProgressDTO, AudioCaptureState } from '../core/ports/audio/types';
-
-/**
- * A bypass bootstrap implementation for the Gemini speech adapter.
- * Skips downloading on-device model weights since inference is delegated to the cloud.
- */
-class GeminiModelBootstrap implements IAudioModelBootstrap {
-  private progressCallback?: (progress: ProgressDTO) => void;
-  private state: AudioCaptureState = 'idle';
-
-  async initialize(): Promise<void> {
-    this.state = 'loading-model';
-    this.progressCallback?.({
-      status: 'downloading',
-      progress: 50,
-      stage: 'conexión',
-      message: 'Conectando a la API de Gemini...',
-    });
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    this.progressCallback?.({
-      status: 'ready',
-      progress: 100,
-      stage: 'listo',
-      message: 'Motor de Gemini 3.5 listo.',
-    });
-    this.state = 'ready';
-  }
-
-  onProgress(callback: (progress: ProgressDTO) => void): void {
-    this.progressCallback = callback;
-  }
-
-  getState(): AudioCaptureState {
-    return this.state;
-  }
-
-  terminate(): void {
-    this.state = 'idle';
-  }
-
-  getWorkerInstance(): Worker | null {
-    return null;
-  }
-}
 
 export default function Home() {
   // Mode configuration: real or mock implementation
@@ -68,31 +20,16 @@ export default function Home() {
     return true;
   });
 
-  const {
-    apiKey,
-    isConfigured: isGeminiConfigured,
-    validateApiKey,
-    saveApiKey,
-    clearApiKey,
-    isValidating,
-    validationError,
-  } = useGeminiSettings();
-
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
   // Re-instantiate based on mode (Real or Mock)
   const bootstrap = useMemo(() => {
     if (useRealImplementation) {
-      if (isGeminiConfigured) {
-        return new GeminiModelBootstrap();
-      }
       return new WorkerAudioModelBootstrap({ quantized: true });
     }
     return new FakeAudioModelBootstrap({
       shouldFail: false,
       progressInterval: 400,
     });
-  }, [useRealImplementation, isGeminiConfigured]);
+  }, [useRealImplementation]);
 
   const recorder = useMemo(() => {
     if (useRealImplementation) {
@@ -113,15 +50,12 @@ export default function Home() {
 
   const analyzer = useMemo(() => {
     if (useRealImplementation) {
-      if (isGeminiConfigured) {
-        return new GeminiSpeechAdapter(() => apiKey);
-      }
       return new TransformersSpeechAdapter(bootstrap, decoder);
     }
     return new FakeAudioAnalyzer({
       delayMs: 1000,
     });
-  }, [useRealImplementation, isGeminiConfigured, apiKey, bootstrap, decoder]);
+  }, [useRealImplementation, bootstrap, decoder]);
 
   const calculateScoreUseCase = useMemo(() => {
     return new CalculateScoreUseCase();
@@ -132,6 +66,7 @@ export default function Home() {
     state,
     progress,
     error,
+    audioBlob,
     isAnalyzing,
     scoreResult,
     initializeModel,
@@ -218,19 +153,8 @@ export default function Home() {
             Carga de Modelo de Voz local en segundo plano y captura privada de audio.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 items-center">
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="bg-amber-300 text-black border-2 border-black text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] cursor-pointer transition-all flex items-center gap-1.5"
-            title="Ajustes de Gemini"
-          >
-            <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            Ajustes Gemini
-          </button>
-          <span className="bg-amber-100 text-stone-850 border-2 border-black text-xs font-semibold px-3 py-1.5 rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+        <div className="flex gap-2">
+          <span className="bg-amber-100 text-stone-800 border-2 border-black text-xs font-semibold px-3 py-1 rounded-full -rotate-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
             Estética Doodle Neo-Brutalista
           </span>
         </div>
@@ -253,59 +177,53 @@ export default function Home() {
           <div className="pl-6 md:pl-10">
             {/* Status bar */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="font-headline font-bold uppercase text-xs text-stone-500">Estado actual:</span>
-                  <span className={`inline-flex items-center px-3 py-1 text-sm font-bold border-2 border-black rounded-full uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)] gap-1.5
-                    ${state === 'idle' ? 'bg-stone-200 text-black' : ''}
-                    ${state === 'loading-model' ? 'bg-amber-300 text-black animate-pulse' : ''}
-                    ${state === 'ready' ? 'bg-emerald-300 text-black' : ''}
-                    ${state === 'recording' ? 'bg-red-400 text-white animate-pulse' : ''}
-                    ${state === 'error' ? 'bg-rose-400 text-black' : ''}
-                  `}>
-                    {state === 'idle' && (
-                      <>
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                        </svg>
-                        Inactivo
-                      </>
-                    )}
-                    {state === 'loading-model' && (
-                      <>
-                        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.73-.73" />
-                        </svg>
-                        Cargando Modelo
-                      </>
-                    )}
-                    {state === 'ready' && (
-                      <>
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                        Modelo Listo
-                      </>
-                    )}
-                    {state === 'recording' && (
-                      <>
-                        <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping inline-block" />
-                        Grabando Voz
-                      </>
-                    )}
-                    {state === 'error' && (
-                      <>
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-                        </svg>
-                        Error
-                      </>
-                    )}
-                  </span>
-                </div>
-                <span className="inline-flex items-center px-3 py-1 text-xs font-bold border-2 border-black rounded-full uppercase bg-stone-100 shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] gap-1.5">
-                  <span className={`w-2.5 h-2.5 rounded-full ${isGeminiConfigured ? 'bg-[#DFFF00]' : 'bg-blue-400'}`} />
-                  Motor: {isGeminiConfigured ? 'Gemini 3.5' : 'Whisper Local'}
+              <div className="flex items-center gap-2">
+                <span className="font-headline font-bold uppercase text-xs text-stone-500">Estado actual:</span>
+                <span className={`inline-flex items-center px-3 py-1 text-sm font-bold border-2 border-black rounded-full uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)] gap-1.5
+                  ${state === 'idle' ? 'bg-stone-200 text-black' : ''}
+                  ${state === 'loading-model' ? 'bg-amber-300 text-black animate-pulse' : ''}
+                  ${state === 'ready' ? 'bg-emerald-300 text-black' : ''}
+                  ${state === 'recording' ? 'bg-red-400 text-white animate-pulse' : ''}
+                  ${state === 'error' ? 'bg-rose-400 text-black' : ''}
+                `}>
+                  {state === 'idle' && (
+                    <>
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                      </svg>
+                      Inactivo
+                    </>
+                  )}
+                  {state === 'loading-model' && (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.73-.73" />
+                      </svg>
+                      Cargando Modelo
+                    </>
+                  )}
+                  {state === 'ready' && (
+                    <>
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Modelo Listo
+                    </>
+                  )}
+                  {state === 'recording' && (
+                    <>
+                      <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping inline-block" />
+                      Grabando Voz
+                    </>
+                  )}
+                  {state === 'error' && (
+                    <>
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                      </svg>
+                      Error
+                    </>
+                  )}
                 </span>
               </div>
               <button
@@ -891,16 +809,6 @@ export default function Home() {
           </div>
         </section>
       </div>
-      <GeminiSettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        currentApiKey={apiKey}
-        validateApiKey={validateApiKey}
-        saveApiKey={saveApiKey}
-        clearApiKey={clearApiKey}
-        isValidating={isValidating}
-        validationError={validationError}
-      />
     </main>
   );
 }

@@ -30,7 +30,6 @@ flowchart LR
 
     subgraph Infrastructure [Adaptadores de Infraestructura - Driven]
         TransformersAdapter[Transformers.js Adapter<br/>Web Worker]
-        GeminiAdapter[Gemini 3.5 Flash Adapter<br/>Resumable Upload & Cache]
         SupabaseAdapter[Supabase Server Action Adapter]
     end
 
@@ -44,21 +43,18 @@ flowchart LR
     UseCase -->|Llama| Repo_Port
 
     Audio_Port -->|Implementado por| TransformersAdapter
-    Audio_Port -->|Implementado por| GeminiAdapter
     Repo_Port -->|Implementado por| SupabaseAdapter
 ```
 
 ## Descripción de Componentes
 
 ### 1. Capa de Presentación (Drivers)
-Incluye los componentes de Next.js, hooks personalizados (como `useGeminiSettings`), el modal neobrutalista `GeminiSettingsModal` y el store de Zustand. Su responsabilidad es inicializar la grabación, gestionar la API Key del usuario de manera segura en local, e instanciar el adaptador de audio correspondiente.
+Incluye los componentes de Next.js, hooks personalizados y el store de Zustand. Su responsabilidad objetivo es iniciar la grabacion y, posteriormente, renderizar la transcripcion completa, iterando sobre los timestamps para marcar en rojo las muletillas detectadas por el Caso de Uso.
 
 ### 2. Núcleo (Dominio y Casos de Uso)
-- **Dominio**: Contiene la lógica de negocio pura (`CalculateScoreUseCase` y entidades). Recibe los datos de la transcripción y ejecuta el algoritmo de puntuación basándose en el conteo de muletillas.
-- **Puertos de Salida**: `IAudioAnalyzer` define el contrato del motor de inferencia (recibe `Float32Array` y devuelve texto e interpolación lineal de timestamps).
+- **Dominio**: Contiene la logica pura. En la arquitectura objetivo recibe la transcripcion completa (texto y timestamps de palabras) y concentra el algoritmo que decide que palabras se consideran disfluencias para calcular el score final.
+- **Puertos de Salida**: `IAudioAnalyzer` define el contrato que requiere el dominio: *"Dame una funcion que reciba un blob de audio y me devuelva una transcripcion completa con timestamps por palabra"*.
 
 ### 3. Adaptadores de Infraestructura (Driven)
-- **Gemini 3.5 Flash Adapter**: Implementación que segmenta el audio en fragmentos de 3 minutos, codifica a WAV localmente, gestiona la subida resumible y concurrente mediante Google Files API y realiza la inferencia mediante el modelo `gemini-3.5-flash` con posterior limpieza de los archivos subidos. Soporta caché offline en IndexedDB.
-- **Transformers.js Adapter**: Adaptador local alternativo para inferencia en el cliente mediante ONNX y WebGPU/WASM.
-- **Supabase Adapter**: Adaptador para persistir métricas de sesión de oratoria en la base de datos externa a través de Server Actions.
-
+- **Transformers.js Adapter**: Implementacion tecnica prevista para encapsular la complejidad de instanciar un Web Worker, cargar el modelo `CrisperWhisper-ONNX` del Hugging Face Hub (o cache local), procesar el audio y formatear la salida para cumplir con la interfaz `IAudioAnalyzer`.
+- **Supabase Adapter**: Adaptador previsto para ejecutarse dentro de una Server Action por seguridad y realizar el `INSERT` de los resultados finales en PostgreSQL.
