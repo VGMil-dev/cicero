@@ -30,7 +30,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -50,6 +50,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: 'cicero-web'
-          directory: 'apps/web/out'
+          command: pages deploy apps/web/out --project-name=cicero-web
+          packageManager: pnpm
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
