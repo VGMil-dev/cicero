@@ -2,6 +2,7 @@ import React from 'react';
 import { useAudioCaptureContext } from '../../contexts/AudioCaptureContext';
 import { useTimer } from '../../hooks/useTimer';
 import { ProgressBar } from '../atoms/ProgressBar';
+import { Button } from '../atoms/Button';
 import { WaveformVisualizer } from '../molecules/WaveformVisualizer';
 
 /**
@@ -64,17 +65,12 @@ export function CaptureCard() {
             <p className="text-stone-600 mb-6 text-sm">
               El componente de grabación está listo pero el modelo aún no se ha inicializado en segundo plano.
             </p>
-            <button
-              onClick={initializeModel}
-              className="px-6 py-3 bg-neon-green text-black font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-sm cursor-pointer"
-            >
-              <span className="flex items-center justify-center gap-1.5">
-                <svg className="w-4 h-4 text-black flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-                Inicializar Modelo
-              </span>
-            </button>
+            <Button variant="primary" onClick={initializeModel} className="uppercase tracking-wider text-sm">
+              <svg className="w-4 h-4 text-black flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              Inicializar Modelo
+            </Button>
           </div>
         )}
 
@@ -110,18 +106,14 @@ export function CaptureCard() {
             <p className="text-stone-600 mb-8 text-sm">
               El modelo de IA está completamente cargado en memoria local. Presiona el botón para iniciar la captura de voz de manera 100% privada.
             </p>
-            <button
-              onClick={handleStartRecording}
-              className="w-24 h-24 mx-auto flex items-center justify-center bg-neon-green text-black border-3 border-black rounded-full shadow-[6px_6px_0px_rgba(0,0,0,1)] hover:translate-x-[-3px] hover:translate-y-[-3px] hover:shadow-[9px_9px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all cursor-pointer group"
-              title="Iniciar Grabación"
-            >
+            <Button variant="primary" shape="circle" onClick={handleStartRecording} title="Iniciar Grabación">
               <svg className="w-10 h-10 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                 <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
                 <line x1="12" x2="12" y1="19" y2="22" />
                 <line x1="8" x2="16" y1="22" y2="22" />
               </svg>
-            </button>
+            </Button>
             <span className="block mt-4 font-headline font-bold text-xs uppercase tracking-wider text-stone-500">
               PRESIONA PARA GRABAR
             </span>
@@ -141,25 +133,19 @@ export function CaptureCard() {
             <WaveformVisualizer isActive={isRecording} />
 
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <button
-                onClick={stopRecording}
-                className="px-6 py-4 bg-red-500 text-white font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2 uppercase tracking-wide text-sm cursor-pointer"
-              >
+              <Button variant="danger" onClick={stopRecording} className="uppercase tracking-wide text-sm py-4">
                 <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                   <rect x="4" y="4" width="16" height="16" rx="2" />
                 </svg>
                 Terminar Grabación
-              </button>
+              </Button>
 
-              <button
-                onClick={cancelRecording}
-                className="px-5 py-4 bg-stone-100 text-stone-800 font-bold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2 text-sm cursor-pointer"
-              >
+              <Button variant="ghost" onClick={cancelRecording} className="text-sm py-4">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
                 Cancelar
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -184,26 +170,20 @@ export function CaptureCard() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={initializeModel}
-                className="px-5 py-3 bg-stone-900 text-white font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <svg className="w-4 h-4 text-white flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <Button variant="dark" onClick={initializeModel} className="uppercase tracking-wider text-xs">
+                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.73-.73" />
                 </svg>
-                <span>Reintentar</span>
-              </button>
-              <button
-                onClick={terminateWorker}
-                className="px-5 py-3 bg-red-400 text-black font-extrabold border-3 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <svg className="w-4 h-4 text-black flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                Reintentar
+              </Button>
+              <Button variant="danger" onClick={terminateWorker} className="uppercase tracking-wider text-xs bg-red-400 text-black">
+                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14a2 2 0 0 0 1.73 3h16a2 2 0 0 0 1.73-3Z" />
                   <line x1="12" y1="9" x2="12" y2="13" />
                   <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
-                <span>IA Reset</span>
-              </button>
+                IA Reset
+              </Button>
             </div>
           </div>
         )}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAudioCaptureContext } from '../../contexts/AudioCaptureContext';
 import { useDI } from '../../contexts/DIContext';
+import { Button } from '../atoms/Button';
 
 /**
  * Organism component rendering the application status bar and control toggles.
@@ -70,27 +71,29 @@ export function StatusIndicator() {
         </div>
 
         {/* Mode Toggle Button */}
-        <button
+        <Button
+          variant="ghost"
           onClick={() => setUseRealImplementation(!useRealImplementation)}
-          className={`px-2.5 py-1 border-2 border-black rounded-lg font-bold text-xs uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all cursor-pointer ${
+          className={`text-xs ${
             useRealImplementation ? 'bg-indigo-100 hover:bg-indigo-200 text-indigo-950' : 'bg-amber-100 hover:bg-amber-200 text-amber-950'
           }`}
           title={useRealImplementation ? "Cambiar a modo simulación (Mock)" : "Cambiar a modo producción (WASM)"}
         >
-          {useRealImplementation ? "Modo: REAL (WASM)" : "Modo: MOCK"}
-        </button>
+          {useRealImplementation ? 'Modo: REAL (WASM)' : 'Modo: MOCK'}
+        </Button>
       </div>
 
-      <button
+      <Button
+        variant="ghost"
         onClick={reset}
-        className="px-3 py-1.5 border-2 border-black rounded-lg bg-stone-100 hover:bg-stone-200 font-bold text-xs uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1.5 cursor-pointer"
+        className="text-xs"
         title="Reiniciar flujo"
       >
         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.73-.73" />
         </svg>
         Reiniciar
-      </button>
+      </Button>
     </div>
   );
 }
