@@ -1,5 +1,5 @@
 import { AudioDecoder } from './AudioDecoder.port';
-import { CaptureError } from '../shared/CaptureError';
+import { AudioDecoderError } from './AudioDecoderError';
 
 /**
  * Adapter implementing {@link AudioDecoder} for browser-based audio decoding and resampling.
@@ -35,25 +35,18 @@ export class BrowserAudioDecoder implements AudioDecoder {
    * 
    * @param audioBlob - The source audio {@link Blob}.
    * @returns A promise resolving to a {@link Float32Array} containing the 16kHz PCM audio data.
-   * @throws {CaptureError} With code `DECODING_FAILED` if the decoding or resampling fails.
+   * @throws {AudioDecoderError} With code `DECODING_FAILED` if the decoding or resampling fails.
    */
   async decodeTo16kHzMono(audioBlob: Blob): Promise<Float32Array> {
     if (!this.OfflineAudioContextClass) {
-      throw new CaptureError(
-        'DECODING_FAILED',
-        'Web Audio API (OfflineAudioContext) is not supported in this environment'
-      );
+      throw new AudioDecoderError('DECODING_FAILED');
     }
 
     let arrayBuffer: ArrayBuffer;
     try {
       arrayBuffer = await audioBlob.arrayBuffer();
     } catch (error) {
-      throw new CaptureError(
-        'DECODING_FAILED',
-        'Failed to read audio blob content',
-        error
-      );
+      throw new AudioDecoderError('DECODING_FAILED', error);
     }
 
     let audioBuffer: AudioBuffer;
@@ -63,11 +56,7 @@ export class BrowserAudioDecoder implements AudioDecoder {
       const tempContext = new this.OfflineAudioContextClass(1, 1, 16000);
       audioBuffer = await tempContext.decodeAudioData(arrayBuffer);
     } catch (error) {
-      throw new CaptureError(
-        'DECODING_FAILED',
-        'Failed to decode audio binary data',
-        error
-      );
+      throw new AudioDecoderError('DECODING_FAILED', error);
     }
 
     // Optimization: If the decoded buffer is already 16kHz and Mono, we can directly return the channel data
@@ -99,11 +88,7 @@ export class BrowserAudioDecoder implements AudioDecoder {
       const renderedBuffer = await offlineContext.startRendering();
       return renderedBuffer.getChannelData(0);
     } catch (error) {
-      throw new CaptureError(
-        'DECODING_FAILED',
-        'Failed to resample audio data to 16kHz mono',
-        error
-      );
+      throw new AudioDecoderError('DECODING_FAILED', error);
     }
   }
 }

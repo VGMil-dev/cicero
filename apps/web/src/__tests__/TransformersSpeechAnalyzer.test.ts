@@ -1,7 +1,8 @@
 import { TransformersSpeechAnalyzer } from '../core/SpeechToText/TransformersSpeechAnalyzer.adapter';
 import { ModelBootstrap } from '../core/SpeechToText/ModelBootstrap.port';
 import { AudioDecoder } from '../core/AudioDecoder/AudioDecoder.port';
-import { CaptureError } from '../core/shared/CaptureError';
+import { SpeechToTextError } from '../core/SpeechToText/SpeechToTextError';
+import { AudioDecoderError } from '../core/AudioDecoder/AudioDecoderError';
 import { AudioCaptureState } from '../core/shared/types';
 
 interface MockWorkerInstance {
@@ -53,19 +54,19 @@ describe('TransformersSpeechAnalyzer Unit Tests', () => {
     };
   });
 
-  it('should throw CaptureError if bootstrap state is not ready', async () => {
+  it('should throw SpeechToTextError if bootstrap state is not ready', async () => {
     mockBootstrap.getState.mockReturnValue('idle' as AudioCaptureState);
     const adapter = new TransformersSpeechAnalyzer(mockBootstrap);
 
     const audioData = new Float32Array([1, 2, 3]);
-    await expect(adapter.analyzeAudio(audioData)).rejects.toThrow(CaptureError);
+    await expect(adapter.analyzeAudio(audioData)).rejects.toThrow(SpeechToTextError);
     
     try {
       await adapter.analyzeAudio(audioData);
     } catch (err: unknown) {
-      const captureError = err as CaptureError;
+      const captureError = err as SpeechToTextError;
       expect(captureError.dto.code).toBe('ANALYSIS_FAILED');
-      expect(captureError.dto.message).toContain('AI model is not initialized or ready');
+      expect(captureError.dto.message).toBe('Fallo al transcribir el audio mediante inferencia local.');
     }
   });
 
@@ -103,7 +104,7 @@ describe('TransformersSpeechAnalyzer Unit Tests', () => {
     expect(mockWorker.removeEventListener).toHaveBeenCalledTimes(2);
   });
 
-  it('should reject with CaptureError when worker returns ERROR message', async () => {
+  it('should reject with SpeechToTextError when worker returns ERROR message', async () => {
     const adapter = new TransformersSpeechAnalyzer(mockBootstrap);
     const audioData = new Float32Array([1, 2, 3]);
 
@@ -122,13 +123,14 @@ describe('TransformersSpeechAnalyzer Unit Tests', () => {
       } as MessageEvent);
     }
 
-    await expect(resultPromise).rejects.toThrow(CaptureError);
+    await expect(resultPromise).rejects.toThrow(SpeechToTextError);
     try {
       await resultPromise;
     } catch (err: unknown) {
-      const captureError = err as CaptureError;
+      const captureError = err as SpeechToTextError;
       expect(captureError.dto.code).toBe('ANALYSIS_FAILED');
-      expect(captureError.dto.message).toBe('Inference ran out of memory');
+      expect(captureError.dto.message).toBe('Fallo al transcribir el audio mediante inferencia local.');
+      expect((captureError.dto.details as any).message).toBe('Inference ran out of memory');
     }
   });
 
@@ -145,13 +147,14 @@ describe('TransformersSpeechAnalyzer Unit Tests', () => {
       } as ErrorEvent);
     }
 
-    await expect(resultPromise).rejects.toThrow(CaptureError);
+    await expect(resultPromise).rejects.toThrow(SpeechToTextError);
     try {
       await resultPromise;
     } catch (err: unknown) {
-      const captureError = err as CaptureError;
+      const captureError = err as SpeechToTextError;
       expect(captureError.dto.code).toBe('WASM_PANIC');
-      expect(captureError.dto.message).toContain('OOM in WASM memory allocation');
+      expect(captureError.dto.message).toBe('Error crítico de ejecución (pánico WASM) en el motor de IA.');
+      expect((captureError.dto.details as any).message).toBe('OOM in WASM memory allocation');
     }
   });
 
@@ -190,17 +193,17 @@ describe('TransformersSpeechAnalyzer Unit Tests', () => {
     expect(result.text).toBe('blob text');
   });
 
-  it('should throw CaptureError with DECODING_FAILED if Blob is passed but no decoder was provided', async () => {
+  it('should throw AudioDecoderError with DECODING_FAILED if Blob is passed but no decoder was provided', async () => {
     const adapter = new TransformersSpeechAnalyzer(mockBootstrap);
     const audioBlob = new Blob(['raw-audio'], { type: 'audio/wav' });
 
-    await expect(adapter.analyzeAudio(audioBlob)).rejects.toThrow(CaptureError);
+    await expect(adapter.analyzeAudio(audioBlob)).rejects.toThrow(AudioDecoderError);
     try {
       await adapter.analyzeAudio(audioBlob);
     } catch (err: unknown) {
-      const captureError = err as CaptureError;
+      const captureError = err as AudioDecoderError;
       expect(captureError.dto.code).toBe('DECODING_FAILED');
-      expect(captureError.dto.message).toContain('Audio decoding requires an AudioDecoder instance');
+      expect(captureError.dto.message).toBe('No se pudo decodificar o remuestrear el archivo de audio.');
     }
   });
 });

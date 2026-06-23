@@ -1,6 +1,6 @@
 import { AudioRecorder } from './AudioRecorder.port';
 import { PermissionsDTO } from '../shared/types';
-import { CaptureError } from '../shared/CaptureError';
+import { RecorderError } from './RecorderError';
 
 /**
  * Adapter implementing {@link AudioRecorder} for native audio capture
@@ -70,33 +70,22 @@ export class BrowserAudioRecorder implements AudioRecorder {
   /**
    * Starts the audio stream capture from the microphone.
    * 
-   * @throws {CaptureError} With code `RECORDING_FAILED` if recording is already active or API is unsupported.
-   * @throws {CaptureError} With code `PERMISSION_DENIED` if microphone permission is denied.
+   * @throws {RecorderError} With code `RECORDING_FAILED` if recording is already active or API is unsupported.
+   * @throws {RecorderError} With code `PERMISSION_DENIED` if microphone permission is denied.
    */
   async startRecording(): Promise<void> {
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-      throw new CaptureError(
-        'RECORDING_FAILED',
-        'Recording is already in progress'
-      );
+      throw new RecorderError('RECORDING_FAILED');
     }
 
     if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new CaptureError(
-        'RECORDING_FAILED',
-        'MediaDevices API is not supported in this browser or context'
-      );
+      throw new RecorderError('RECORDING_FAILED');
     }
 
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new CaptureError(
-        'PERMISSION_DENIED',
-        `Microphone access was denied or unavailable: ${message}`,
-        error
-      );
+      throw new RecorderError('PERMISSION_DENIED', error);
     }
 
     try {
@@ -113,12 +102,7 @@ export class BrowserAudioRecorder implements AudioRecorder {
       this.mediaRecorder.start();
     } catch (error) {
       this.cleanupStream();
-      const message = error instanceof Error ? error.message : String(error);
-      throw new CaptureError(
-        'RECORDING_FAILED',
-        `Failed to start MediaRecorder: ${message}`,
-        error
-      );
+      throw new RecorderError('RECORDING_FAILED', error);
     }
   }
 
@@ -126,19 +110,16 @@ export class BrowserAudioRecorder implements AudioRecorder {
    * Stops the current recording and releases the microphone.
    * 
    * @returns A promise resolving to a {@link Blob} containing the captured audio data.
-   * @throws {CaptureError} With code `RECORDING_FAILED` if there is no active recording.
+   * @throws {RecorderError} With code `RECORDING_FAILED` if there is no active recording.
    */
   async stopRecording(): Promise<Blob> {
     if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') {
-      throw new CaptureError(
-        'RECORDING_FAILED',
-        'No active recording to stop'
-      );
+      throw new RecorderError('RECORDING_FAILED');
     }
 
     return new Promise<Blob>((resolve, reject) => {
       if (!this.mediaRecorder) {
-        reject(new CaptureError('RECORDING_FAILED', 'Recorder was disposed before stopping'));
+        reject(new RecorderError('RECORDING_FAILED'));
         return;
       }
 
@@ -150,11 +131,7 @@ export class BrowserAudioRecorder implements AudioRecorder {
           resolve(audioBlob);
         } catch (error) {
           this.cleanup();
-          reject(new CaptureError(
-            'RECORDING_FAILED',
-            'Failed to compile recorded audio data',
-            error
-          ));
+          reject(new RecorderError('RECORDING_FAILED', error));
         }
       };
 
@@ -163,11 +140,7 @@ export class BrowserAudioRecorder implements AudioRecorder {
         this.cleanupStream(); // Release microphone as soon as stop is initiated
       } catch (error) {
         this.cleanup();
-        reject(new CaptureError(
-          'RECORDING_FAILED',
-          'Failed to stop MediaRecorder execution',
-          error
-        ));
+        reject(new RecorderError('RECORDING_FAILED', error));
       }
     });
   }

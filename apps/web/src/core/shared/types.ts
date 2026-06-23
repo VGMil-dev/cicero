@@ -91,8 +91,8 @@ export type ErrorCode =
  * ```
  */
 export interface ErrorDTO {
-  /** Machine-readable error code, {@link ErrorCode} */
-  code: ErrorCode;
+  /** Machine-readable error code */
+  code: string;
   /** Human-readable error message */
   message: string;
   /** Optional technical details or structured payloads */

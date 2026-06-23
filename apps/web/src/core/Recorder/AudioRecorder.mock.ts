@@ -1,5 +1,5 @@
 import { AudioRecorder } from './AudioRecorder.port';
-import { CaptureError } from '../shared/CaptureError';
+import { RecorderError } from './RecorderError';
 import { PermissionsDTO } from '../shared/types';
 
 /**
@@ -64,22 +64,16 @@ export class FakeAudioRecorder implements AudioRecorder {
    * If {@link FakeAudioRecorderOptions.shouldFailOnStart} is `true`, rejects
    * with `RECORDING_FAILED`.
    *
-   * @throws {CaptureError} With code `RECORDING_FAILED` when simulated failure is enabled.
-   * @throws {CaptureError} With code `PERMISSION_DENIED` if permissions were not granted.
+   * @throws {RecorderError} With code `RECORDING_FAILED` when simulated failure is enabled.
+   * @throws {RecorderError} With code `PERMISSION_DENIED` if permissions were not granted.
    */
   async startRecording(): Promise<void> {
     if (!this.options.grantPermission) {
-      throw new CaptureError(
-        'PERMISSION_DENIED',
-        'Microphone permission was denied',
-      );
+      throw new RecorderError('PERMISSION_DENIED');
     }
 
     if (this.options.shouldFailOnStart) {
-      throw new CaptureError(
-        'RECORDING_FAILED',
-        'Simulated recording failure for UI testing',
-      );
+      throw new RecorderError('RECORDING_FAILED');
     }
   }
 

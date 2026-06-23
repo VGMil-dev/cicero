@@ -1,6 +1,6 @@
 import { ModelBootstrap } from './ModelBootstrap.port';
 import { AudioCaptureState, ProgressDTO, WorkerMessageDTO, MainThreadMessageDTO } from '../shared/types';
-import { CaptureError } from '../shared/CaptureError';
+import { SpeechToTextError } from './SpeechToTextError';
 
 /**
  * Opciones para configurar la inicialización del modelo de audio.
@@ -17,7 +17,7 @@ export interface WorkerAudioModelBootstrapOptions {
  * y descarga del modelo de voz local en un Web Worker en segundo plano.
  * 
  * Gestiona el ciclo de vida del Web Worker, intercepta y procesa los mensajes del hilo
- * secundario, reporta el progreso detallado a la UI y traduce errores en instancias de {@link CaptureError}.
+ * secundario, reporta el progreso detallado a la UI y traduce errores en instancias de {@link SpeechToTextError}.
  * 
  * @example
  * ```typescript
@@ -35,7 +35,7 @@ export class WorkerModelBootstrap implements ModelBootstrap {
   
   // Promesas diferidas para gestionar peticiones concurrentes o llamadas asíncronas
   private resolveInit: (() => void) | null = null;
-  private rejectInit: ((error: CaptureError) => void) | null = null;
+  private rejectInit: ((error: SpeechToTextError) => void) | null = null;
 
   /**
    * Crea una instancia de WorkerAudioModelBootstrap.
@@ -51,7 +51,7 @@ export class WorkerModelBootstrap implements ModelBootstrap {
    * Inicia el Web Worker y comienza la descarga y preparación del modelo.
    * Devuelve una promesa que se resuelve cuando el modelo está cargado y listo.
    * 
-   * @throws {CaptureError} Si el almacenamiento es insuficiente o falla la compilación del modelo.
+   * @throws {SpeechToTextError} Si el almacenamiento es insuficiente o falla la compilación del modelo.
    */
   async initialize(): Promise<void> {
     if (this.state === 'ready') {
@@ -108,12 +108,7 @@ export class WorkerModelBootstrap implements ModelBootstrap {
         this.worker.postMessage(loadMessage);
       } catch (err) {
         this.state = 'error';
-        const errorObj = err instanceof Error ? err : new Error(String(err));
-        const captureError = new CaptureError(
-          'MODEL_LOAD_FAILED',
-          `Fallo al instanciar el Web Worker en Next.js: ${errorObj.message}`,
-          err
-        );
+        const captureError = new SpeechToTextError('MODEL_LOAD_FAILED', err);
         reject(captureError);
       }
     });
@@ -186,10 +181,9 @@ export class WorkerModelBootstrap implements ModelBootstrap {
       case 'ERROR': {
         this.state = 'error';
         const errorPayload = message.payload;
-        const captureError = new CaptureError(
-          errorPayload.code,
-          errorPayload.message,
-          errorPayload.details
+        const captureError = new SpeechToTextError(
+          errorPayload.code as any,
+          { message: errorPayload.message, details: errorPayload.details }
         );
         if (errorPayload.stack) {
           captureError.stack = errorPayload.stack;
@@ -206,11 +200,7 @@ export class WorkerModelBootstrap implements ModelBootstrap {
 
   private handleWorkerPanic(errorEvent: ErrorEvent): void {
     this.state = 'error';
-    const captureError = new CaptureError(
-      'WASM_PANIC',
-      `Fallo crítico de ejecución en el Web Worker: ${errorEvent.message || 'Error desconocido'}`,
-      errorEvent
-    );
+    const captureError = new SpeechToTextError('WASM_PANIC', errorEvent);
 
     if (this.rejectInit) {
       this.rejectInit(captureError);

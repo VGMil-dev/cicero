@@ -1,6 +1,6 @@
 import { ModelBootstrap } from './ModelBootstrap.port';
 import { AudioCaptureState, ProgressDTO, ProgressStatus } from '../shared/types';
-import { CaptureError } from '../shared/CaptureError';
+import { SpeechToTextError } from './SpeechToTextError';
 
 /**
  * Configuration options for {@link FakeAudioModelBootstrap}.
@@ -104,7 +104,7 @@ export class FakeAudioModelBootstrap implements ModelBootstrap {
         if (this.options.shouldFail && current.progress >= this.options.failAtProgress) {
           this.clearTimer();
           this.state = 'error';
-          reject(new CaptureError('MODEL_LOAD_FAILED', 'Simulated model load failure for UI testing'));
+          reject(new SpeechToTextError('MODEL_LOAD_FAILED'));
           return;
         }
 

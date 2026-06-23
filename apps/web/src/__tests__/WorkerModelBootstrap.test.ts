@@ -1,5 +1,5 @@
 import { WorkerModelBootstrap } from '../core/SpeechToText/WorkerModelBootstrap.adapter';
-import { CaptureError } from '../core/shared/CaptureError';
+import { SpeechToTextError } from '../core/SpeechToText/SpeechToTextError';
 import { ProgressDTO } from '../core/shared/types';
 
 interface MockWorkerInstance {
@@ -118,7 +118,7 @@ describe('WorkerModelBootstrap Adapter', () => {
   });
 
   describe('Error handling and panic scenarios', () => {
-    it('should reject with CaptureError if Worker reports an ERROR message', async () => {
+    it('should reject with SpeechToTextError if Worker reports an ERROR message', async () => {
       const bootstrap = new WorkerModelBootstrap();
       
       const initPromise = bootstrap.initialize();
@@ -138,14 +138,16 @@ describe('WorkerModelBootstrap Adapter', () => {
         });
       }
 
-      await expect(initPromise).rejects.toThrow(CaptureError);
+      await expect(initPromise).rejects.toThrow(SpeechToTextError);
       
       try {
         await initPromise;
       } catch (err) {
-        const captureError = err as CaptureError;
+        const captureError = err as SpeechToTextError;
         expect(captureError.dto.code).toBe('MODEL_LOAD_FAILED');
-        expect(captureError.dto.message).toBe('Disk quota exceeded');
+        expect(captureError.dto.message).toBe('Error al descargar o inicializar los modelos de IA.');
+        expect((captureError.dto.details as any).message).toBe('Disk quota exceeded');
+        expect((captureError.dto.details as any).details).toEqual({ quota: 200 });
         expect(bootstrap.getState()).toBe('error');
       }
     });
@@ -170,14 +172,15 @@ describe('WorkerModelBootstrap Adapter', () => {
         workerInstance.onerror(errorEvent as unknown as ErrorEvent);
       }
 
-      await expect(initPromise).rejects.toThrow(CaptureError);
+      await expect(initPromise).rejects.toThrow(SpeechToTextError);
 
       try {
         await initPromise;
       } catch (err) {
-        const captureError = err as CaptureError;
+        const captureError = err as SpeechToTextError;
         expect(captureError.dto.code).toBe('WASM_PANIC');
-        expect(captureError.dto.message).toContain('Fallo crítico de ejecución en el Web Worker: WASM out of bounds memory access');
+        expect(captureError.dto.message).toBe('Error crítico de ejecución (pánico WASM) en el motor de IA.');
+        expect((captureError.dto.details as any).message).toBe('WASM out of bounds memory access');
         expect(bootstrap.getState()).toBe('error');
       }
 

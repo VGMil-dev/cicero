@@ -1,5 +1,5 @@
 import { BrowserAudioRecorder } from '../core/Recorder/BrowserAudioRecorder.adapter';
-import { CaptureError } from '../core/shared/CaptureError';
+import { RecorderError } from '../core/Recorder/RecorderError';
 
 describe('BrowserAudioRecorder Adapter', () => {
   let originalNavigator: typeof navigator;
@@ -141,14 +141,14 @@ describe('BrowserAudioRecorder Adapter', () => {
       mockGetUserMedia.mockRejectedValue(accessError);
 
       const recorder = new BrowserAudioRecorder();
-      await expect(recorder.startRecording()).rejects.toThrow(CaptureError);
+      await expect(recorder.startRecording()).rejects.toThrow(RecorderError);
       
       try {
         await recorder.startRecording();
       } catch (err) {
-        const captureError = err as CaptureError;
+        const captureError = err as RecorderError;
         expect(captureError.dto.code).toBe('PERMISSION_DENIED');
-        expect(captureError.dto.message).toContain('Microphone access was denied or unavailable');
+        expect(captureError.dto.message).toContain('El acceso al micrófono fue denegado');
         expect(captureError.dto.details).toBe(accessError);
       }
     });
@@ -157,13 +157,13 @@ describe('BrowserAudioRecorder Adapter', () => {
       const recorder = new BrowserAudioRecorder();
       await recorder.startRecording();
 
-      await expect(recorder.startRecording()).rejects.toThrow(CaptureError);
+      await expect(recorder.startRecording()).rejects.toThrow(RecorderError);
       try {
         await recorder.startRecording();
       } catch (err) {
-        const captureError = err as CaptureError;
+        const captureError = err as RecorderError;
         expect(captureError.dto.code).toBe('RECORDING_FAILED');
-        expect(captureError.dto.message).toBe('Recording is already in progress');
+        expect(captureError.dto.message).toBe('La grabación de audio falló o el dispositivo no está listo.');
       }
     });
   });
@@ -182,14 +182,14 @@ describe('BrowserAudioRecorder Adapter', () => {
 
     it('should throw RECORDING_FAILED if stopRecording is called when inactive', async () => {
       const recorder = new BrowserAudioRecorder();
-      await expect(recorder.stopRecording()).rejects.toThrow(CaptureError);
+      await expect(recorder.stopRecording()).rejects.toThrow(RecorderError);
 
       try {
         await recorder.stopRecording();
       } catch (err) {
-        const captureError = err as CaptureError;
+        const captureError = err as RecorderError;
         expect(captureError.dto.code).toBe('RECORDING_FAILED');
-        expect(captureError.dto.message).toBe('No active recording to stop');
+        expect(captureError.dto.message).toBe('La grabación de audio falló o el dispositivo no está listo.');
       }
     });
   });
@@ -204,7 +204,7 @@ describe('BrowserAudioRecorder Adapter', () => {
       expect(mockTrack.stop).toHaveBeenCalled();
       
       // Attempting to stop again should throw RECORDING_FAILED because it was cleaned up
-      await expect(recorder.stopRecording()).rejects.toThrow(CaptureError);
+      await expect(recorder.stopRecording()).rejects.toThrow(RecorderError);
     });
   });
 });

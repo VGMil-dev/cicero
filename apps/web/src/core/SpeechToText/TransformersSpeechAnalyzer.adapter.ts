@@ -1,7 +1,8 @@
 import { SpeechAnalyzer } from './SpeechAnalyzer.port';
 import { ModelBootstrap } from './ModelBootstrap.port';
 import { AudioDecoder } from '../AudioDecoder/AudioDecoder.port';
-import { CaptureError } from '../shared/CaptureError';
+import { SpeechToTextError } from './SpeechToTextError';
+import { AudioDecoderError } from '../AudioDecoder/AudioDecoderError';
 import { TranscriptionResultDTO, WorkerMessageDTO } from '../shared/types';
 
 /**
@@ -46,25 +47,19 @@ export class TransformersSpeechAnalyzer implements SpeechAnalyzer {
    * 
    * @param audioData - Raw 16kHz mono PCM data as {@link Float32Array} or audio {@link Blob}.
    * @returns A promise resolving to the {@link TranscriptionResultDTO}.
-   * @throws {CaptureError} If model/worker is not ready, decoding fails, or inference fails.
+   * @throws {SpeechToTextError} If model/worker is not ready, decoding fails, or inference fails.
    */
   async analyzeAudio(audioData: Float32Array | Blob): Promise<TranscriptionResultDTO> {
     // 1. Verify that the model/worker is ready
     if (this.bootstrap.getState() !== 'ready') {
-      throw new CaptureError(
-        'ANALYSIS_FAILED',
-        'AI model is not initialized or ready. Ensure bootstrap.initialize() is resolved first.'
-      );
+      throw new SpeechToTextError('ANALYSIS_FAILED');
     }
 
     // 2. Decode the audio Blob to 16kHz mono PCM if a Blob is provided
     let pcm: Float32Array;
     if (audioData instanceof Blob) {
       if (!this.decoder) {
-        throw new CaptureError(
-          'DECODING_FAILED',
-          'Audio decoding requires an AudioDecoder instance, but none was provided.'
-        );
+        throw new AudioDecoderError('DECODING_FAILED');
       }
       pcm = await this.decoder.decodeTo16kHzMono(audioData);
     } else {
@@ -75,12 +70,7 @@ export class TransformersSpeechAnalyzer implements SpeechAnalyzer {
     return new Promise<TranscriptionResultDTO>((resolve, reject) => {
       const worker = this.bootstrap.getWorkerInstance?.() || null;
       if (!worker) {
-        return reject(
-          new CaptureError(
-            'ANALYSIS_FAILED',
-            'Web Worker is not active or has been unexpectedly terminated.'
-          )
-        );
+        return reject(new SpeechToTextError('ANALYSIS_FAILED'));
       }
 
       // Handle message events back from the worker
@@ -94,10 +84,9 @@ export class TransformersSpeechAnalyzer implements SpeechAnalyzer {
         } else if (msg.type === 'ERROR') {
           cleanup();
           reject(
-            new CaptureError(
-              msg.payload.code,
-              msg.payload.message,
-              msg.payload.details
+            new SpeechToTextError(
+              msg.payload.code as any,
+              { message: msg.payload.message, details: msg.payload.details }
             )
           );
         }
@@ -106,12 +95,7 @@ export class TransformersSpeechAnalyzer implements SpeechAnalyzer {
       // Handle fatal worker/WASM crashes
       const handleWorkerError = (errorEvent: ErrorEvent) => {
         cleanup();
-        reject(
-          new CaptureError(
-            'WASM_PANIC',
-            `Critical execution error inside Web Worker: ${errorEvent.message || 'Unknown panic'}`
-          )
-        );
+        reject(new SpeechToTextError('WASM_PANIC', errorEvent));
       };
 
       // Unsubscribe listeners from the worker
@@ -134,14 +118,7 @@ export class TransformersSpeechAnalyzer implements SpeechAnalyzer {
         );
       } catch (err: unknown) {
         cleanup();
-        const msg = err instanceof Error ? err.message : String(err);
-        reject(
-          new CaptureError(
-            'ANALYSIS_FAILED',
-            `Failed to transfer audio buffer to Web Worker: ${msg}`,
-            err
-          )
-        );
+        reject(new SpeechToTextError('ANALYSIS_FAILED', err));
       }
     });
   }
