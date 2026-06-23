@@ -1,0 +1,5 @@
+{
+  "MODEL_LOAD_FAILED": "Error al descargar o inicializar los modelos de IA.",
+  "ANALYSIS_FAILED": "Fallo al transcribir el audio mediante inferencia local.",
+  "WASM_PANIC": "Error crítico de ejecución (pánico WASM) en el motor de IA."
+}

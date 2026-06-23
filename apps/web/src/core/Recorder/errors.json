@@ -1,0 +1,4 @@
+{
+  "PERMISSION_DENIED": "El acceso al micrófono fue denegado o no está disponible.",
+  "RECORDING_FAILED": "La grabación de audio falló o el dispositivo no está listo."
+}

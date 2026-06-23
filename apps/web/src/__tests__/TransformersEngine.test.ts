@@ -1,4 +1,4 @@
-import { TransformersEngine } from '../core/adapters/audio/TransformersEngine';
+import { TransformersEngine } from '../core/SpeechToText/Transformers.engine';
 import { pipeline } from '@huggingface/transformers';
 
 jest.mock('@huggingface/transformers', () => ({

@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { BrowserAudioDecoder } from '../core/adapters/audio/BrowserAudioDecoder';
-import { CaptureError } from '../core/ports/audio/CaptureError';
+import { BrowserAudioDecoder } from '../core/AudioDecoder/BrowserAudioDecoder.adapter';
+import { AudioDecoderError } from '../core/AudioDecoder/AudioDecoderError';
 
 describe('BrowserAudioDecoder Adapter', () => {
   let MockOfflineAudioContextClass: any;
@@ -77,34 +76,34 @@ describe('BrowserAudioDecoder Adapter', () => {
     expect(decoder).toBeDefined();
   });
 
-  it('should throw CaptureError with DECODING_FAILED if OfflineAudioContext is not supported', async () => {
+  it('should throw AudioDecoderError with DECODING_FAILED if OfflineAudioContext is not supported', async () => {
     const decoder = new BrowserAudioDecoder(null as any);
     const blob = new Blob(['audio-binary'], { type: 'audio/webm' });
 
-    await expect(decoder.decodeTo16kHzMono(blob)).rejects.toThrow(CaptureError);
+    await expect(decoder.decodeTo16kHzMono(blob)).rejects.toThrow(AudioDecoderError);
     try {
       await decoder.decodeTo16kHzMono(blob);
     } catch (error) {
-      const captureError = error as CaptureError;
+      const captureError = error as AudioDecoderError;
       expect(captureError.dto.code).toBe('DECODING_FAILED');
-      expect(captureError.dto.message).toContain('not supported');
+      expect(captureError.dto.message).toContain('No se pudo decodificar o remuestrear');
     }
   });
 
-  it('should throw CaptureError with DECODING_FAILED if Blob.arrayBuffer fails', async () => {
+  it('should throw AudioDecoderError with DECODING_FAILED if Blob.arrayBuffer fails', async () => {
     const decoder = new BrowserAudioDecoder(MockOfflineAudioContextClass);
     
     // Create a mock Blob where arrayBuffer() throws an error
     const brokenBlob = new Blob();
     brokenBlob.arrayBuffer = jest.fn().mockRejectedValue(new Error('Read error'));
 
-    await expect(decoder.decodeTo16kHzMono(brokenBlob)).rejects.toThrow(CaptureError);
+    await expect(decoder.decodeTo16kHzMono(brokenBlob)).rejects.toThrow(AudioDecoderError);
     try {
       await decoder.decodeTo16kHzMono(brokenBlob);
     } catch (error) {
-      const captureError = error as CaptureError;
+      const captureError = error as AudioDecoderError;
       expect(captureError.dto.code).toBe('DECODING_FAILED');
-      expect(captureError.dto.message).toContain('Failed to read audio blob content');
+      expect(captureError.dto.message).toContain('No se pudo decodificar o remuestrear');
     }
   });
 
@@ -164,7 +163,7 @@ describe('BrowserAudioDecoder Adapter', () => {
     expect(mockDecodedBuffer.getChannelData).toHaveBeenCalledWith(0);
   });
 
-  it('should throw CaptureError with DECODING_FAILED if decodeAudioData rejects', async () => {
+  it('should throw AudioDecoderError with DECODING_FAILED if decodeAudioData rejects', async () => {
     const decoder = new BrowserAudioDecoder(MockOfflineAudioContextClass);
     const blob = new Blob(['mock-binary-data'], { type: 'audio/webm' });
 
@@ -172,17 +171,17 @@ describe('BrowserAudioDecoder Adapter', () => {
     const mockError = new Error('Invalid format');
     MockOfflineAudioContextClass.prototype.decodeAudioData = jest.fn().mockRejectedValue(mockError);
 
-    await expect(decoder.decodeTo16kHzMono(blob)).rejects.toThrow(CaptureError);
+    await expect(decoder.decodeTo16kHzMono(blob)).rejects.toThrow(AudioDecoderError);
     try {
       await decoder.decodeTo16kHzMono(blob);
     } catch (error) {
-      const captureError = error as CaptureError;
+      const captureError = error as AudioDecoderError;
       expect(captureError.dto.code).toBe('DECODING_FAILED');
-      expect(captureError.dto.message).toContain('Failed to decode audio binary data');
+      expect(captureError.dto.message).toContain('No se pudo decodificar o remuestrear');
     }
   });
 
-  it('should throw CaptureError with DECODING_FAILED if rendering fails', async () => {
+  it('should throw AudioDecoderError with DECODING_FAILED if rendering fails', async () => {
     const decoder = new BrowserAudioDecoder(MockOfflineAudioContextClass);
     const blob = new Blob(['mock-binary-data'], { type: 'audio/webm' });
 
@@ -190,13 +189,13 @@ describe('BrowserAudioDecoder Adapter', () => {
     const mockError = new Error('Render timeout');
     MockOfflineAudioContextClass.prototype.startRendering = jest.fn().mockRejectedValue(mockError);
 
-    await expect(decoder.decodeTo16kHzMono(blob)).rejects.toThrow(CaptureError);
+    await expect(decoder.decodeTo16kHzMono(blob)).rejects.toThrow(AudioDecoderError);
     try {
       await decoder.decodeTo16kHzMono(blob);
     } catch (error) {
-      const captureError = error as CaptureError;
+      const captureError = error as AudioDecoderError;
       expect(captureError.dto.code).toBe('DECODING_FAILED');
-      expect(captureError.dto.message).toContain('Failed to resample audio data to 16kHz mono');
+      expect(captureError.dto.message).toContain('No se pudo decodificar o remuestrear');
     }
   });
 });
