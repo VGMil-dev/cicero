@@ -73,10 +73,13 @@ export function StatusIndicator() {
         {/* Mode Toggle Button */}
         <Button
           variant="ghost"
-          onClick={() => setUseRealImplementation(!useRealImplementation)}
-          className={`text-xs ${
-            useRealImplementation ? 'bg-indigo-100 hover:bg-indigo-200 text-indigo-950' : 'bg-amber-100 hover:bg-amber-200 text-amber-950'
+          size="sm"
+          className={`uppercase ${
+            useRealImplementation
+              ? 'bg-indigo-100 hover:bg-indigo-200 text-indigo-950'
+              : 'bg-amber-100 hover:bg-amber-200 text-amber-950'
           }`}
+          onClick={() => setUseRealImplementation(!useRealImplementation)}
           title={useRealImplementation ? "Cambiar a modo simulación (Mock)" : "Cambiar a modo producción (WASM)"}
         >
           {useRealImplementation ? 'Modo: REAL (WASM)' : 'Modo: MOCK'}
@@ -85,8 +88,9 @@ export function StatusIndicator() {
 
       <Button
         variant="ghost"
+        size="sm"
+        className="bg-stone-100 text-stone-800 uppercase"
         onClick={reset}
-        className="text-xs"
         title="Reiniciar flujo"
       >
         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

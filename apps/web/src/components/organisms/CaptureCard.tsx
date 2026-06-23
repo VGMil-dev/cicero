@@ -65,8 +65,13 @@ export function CaptureCard() {
             <p className="text-stone-600 mb-6 text-sm">
               El componente de grabación está listo pero el modelo aún no se ha inicializado en segundo plano.
             </p>
-            <Button variant="primary" onClick={initializeModel} className="uppercase tracking-wider text-sm">
-              <svg className="w-4 h-4 text-black flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <Button
+              variant="primary"
+              size="md"
+              className="bg-neon-green text-black uppercase tracking-wider"
+              onClick={initializeModel}
+            >
+              <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
               Inicializar Modelo
@@ -106,7 +111,13 @@ export function CaptureCard() {
             <p className="text-stone-600 mb-8 text-sm">
               El modelo de IA está completamente cargado en memoria local. Presiona el botón para iniciar la captura de voz de manera 100% privada.
             </p>
-            <Button variant="primary" shape="circle" onClick={handleStartRecording} title="Iniciar Grabación">
+            <Button
+              variant="primary"
+              shape="circle"
+              className="bg-neon-green text-black"
+              onClick={handleStartRecording}
+              title="Iniciar Grabación"
+            >
               <svg className="w-10 h-10 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                 <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
@@ -133,14 +144,24 @@ export function CaptureCard() {
             <WaveformVisualizer isActive={isRecording} />
 
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button variant="danger" onClick={stopRecording} className="uppercase tracking-wide text-sm py-4">
+              <Button
+                variant="danger"
+                size="lg"
+                className="bg-red-500 text-white uppercase tracking-wide"
+                onClick={stopRecording}
+              >
                 <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                   <rect x="4" y="4" width="16" height="16" rx="2" />
                 </svg>
                 Terminar Grabación
               </Button>
 
-              <Button variant="ghost" onClick={cancelRecording} className="text-sm py-4">
+              <Button
+                variant="ghost"
+                size="lg"
+                className="bg-stone-100 text-stone-800"
+                onClick={cancelRecording}
+              >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -170,13 +191,23 @@ export function CaptureCard() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="dark" onClick={initializeModel} className="uppercase tracking-wider text-xs">
+              <Button
+                variant="dark"
+                size="md"
+                className="bg-stone-900 text-white uppercase tracking-wider"
+                onClick={initializeModel}
+              >
                 <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.73-.73" />
                 </svg>
                 Reintentar
               </Button>
-              <Button variant="danger" onClick={terminateWorker} className="uppercase tracking-wider text-xs bg-red-400 text-black">
+              <Button
+                variant="danger"
+                size="md"
+                className="bg-red-400 text-black uppercase tracking-wider"
+                onClick={terminateWorker}
+              >
                 <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14a2 2 0 0 0 1.73 3h16a2 2 0 0 0 1.73-3Z" />
                   <line x1="12" y1="9" x2="12" y2="13" />
