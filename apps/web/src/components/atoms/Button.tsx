@@ -106,7 +106,7 @@ export function Button({
         transition-all cursor-pointer
         ${variantStyles[variant]}
         ${shapeStyles[shape]}
-        ${shape === 'icon' ? 'w-8 h-8 rounded' : ''}
+        ${variant === 'icon' ? 'w-8 h-8 rounded' : ''}
         ${className}
       `.trim().replace(/\s+/g, ' ')}
       {...props}
