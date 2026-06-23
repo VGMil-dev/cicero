@@ -81,7 +81,7 @@ const variantStyles: Record<ButtonVariant, string> = {
 
 const shapeStyles: Record<ButtonShape, string> = {
   rectangle: 'rounded-xl flex items-center justify-center gap-1.5',
-  circle: 'rounded-full w-24 h-24 flex items-center justify-center group',
+  circle: 'rounded-full w-24 h-24 mx-auto flex items-center justify-center group',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
