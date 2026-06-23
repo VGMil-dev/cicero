@@ -1,5 +1,6 @@
 import { CalculateScoreUseCase, ScoreResult } from './CalculateScore.port';
-import { TranscriptionResultDTO, AudioChunkDTO } from '../shared/types';
+import { TranscriptionResultDTO } from '../SpeechToText/types';
+import { AudioChunkDTO } from './types';
 
 /**
  * Default dictionary of filler words (muletillas) in Spanish.

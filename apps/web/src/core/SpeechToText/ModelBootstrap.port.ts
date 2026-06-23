@@ -1,4 +1,5 @@
-import { ProgressDTO, AudioCaptureState } from '../shared/types';
+import { AudioCaptureState } from '../shared/types';
+import { ProgressDTO } from './types';
 
 /**
  * Interface for the AI model initialization service.

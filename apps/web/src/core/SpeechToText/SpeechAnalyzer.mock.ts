@@ -1,5 +1,5 @@
 import { SpeechAnalyzer } from './SpeechAnalyzer.port';
-import { TranscriptionResultDTO } from '../shared/types';
+import { TranscriptionResultDTO } from './types';
 
 /**
  * Configuration options for {@link FakeAudioAnalyzer}.

@@ -3,7 +3,7 @@ import { ModelBootstrap } from './ModelBootstrap.port';
 import { AudioDecoder } from '../AudioDecoder/AudioDecoder.port';
 import { SpeechToTextError } from './SpeechToTextError';
 import { AudioDecoderError } from '../AudioDecoder/AudioDecoderError';
-import { TranscriptionResultDTO, WorkerMessageDTO } from '../shared/types';
+import { TranscriptionResultDTO, WorkerMessageDTO } from './types';
 
 /**
  * Secondary adapter (Driven) that orchestrates audio speech-to-text analysis.

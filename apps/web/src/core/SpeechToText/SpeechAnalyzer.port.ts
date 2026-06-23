@@ -1,4 +1,4 @@
-import { TranscriptionResultDTO } from '../shared/types';
+import { TranscriptionResultDTO } from './types';
 
 /**
  * Interface for the secondary port (Driven) responsible for audio analysis and speech-to-text.

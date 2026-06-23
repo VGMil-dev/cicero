@@ -1,5 +1,6 @@
 import { ModelBootstrap } from './ModelBootstrap.port';
-import { AudioCaptureState, ProgressDTO, ProgressStatus } from '../shared/types';
+import { AudioCaptureState } from '../shared/types';
+import { ProgressDTO, ProgressStatus } from './types';
 import { SpeechToTextError } from './SpeechToTextError';
 
 /**

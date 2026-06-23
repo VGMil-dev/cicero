@@ -1,6 +1,6 @@
 import { WorkerModelBootstrap } from '../core/SpeechToText/WorkerModelBootstrap.adapter';
 import { SpeechToTextError } from '../core/SpeechToText/SpeechToTextError';
-import { ProgressDTO } from '../core/shared/types';
+import { ProgressDTO } from '../core/SpeechToText/types';
 
 interface MockWorkerInstance {
   onmessage: ((event: { data: unknown }) => void) | null;

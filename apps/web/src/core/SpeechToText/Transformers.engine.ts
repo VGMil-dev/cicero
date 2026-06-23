@@ -1,5 +1,5 @@
 import { pipeline } from '@huggingface/transformers';
-import { TranscriptionResultDTO, RawAudioChunk } from '../shared/types';
+import { TranscriptionResultDTO, RawAudioChunk } from './types';
 
 /**
  * Progress updates shape emitted by Transformers.js shards downloader.

@@ -1,5 +1,5 @@
 import { DefaultCalculateScoreUseCase } from '../core/OratoryAnalysis/CalculateScore.usecase';
-import { TranscriptionResultDTO } from '../core/shared/types';
+import { TranscriptionResultDTO } from '../core/SpeechToText/types';
 
 describe('CalculateScoreUseCase', () => {
   let useCase: DefaultCalculateScoreUseCase;

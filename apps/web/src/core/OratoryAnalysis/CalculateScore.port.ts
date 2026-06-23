@@ -1,4 +1,5 @@
-import { TranscriptionResultDTO, SessionMetricsDTO, AudioChunkDTO } from '../shared/types';
+import { TranscriptionResultDTO } from '../SpeechToText/types';
+import { SessionMetricsDTO, AudioChunkDTO } from './types';
 
 /**
  * Result of the speech evaluation containing fluency metrics and annotated chunks.

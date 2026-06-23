@@ -4,7 +4,8 @@ import { AudioRecorder } from '../core/Recorder/AudioRecorder.port';
 import { AudioDecoder } from '../core/AudioDecoder/AudioDecoder.port';
 import { SpeechAnalyzer } from '../core/SpeechToText/SpeechAnalyzer.port';
 import { CalculateScoreUseCase, ScoreResult } from '../core/OratoryAnalysis/CalculateScore.port';
-import { AudioCaptureState, ErrorDTO, ProgressDTO, ErrorCode } from '../core/shared/types';
+import { AudioCaptureState, ErrorDTO, ErrorCode } from '../core/shared/types';
+import { ProgressDTO } from '../core/SpeechToText/types';
 
 /**
  * Hook to orchestrate the AI model bootstrap, audio recording, decoding, analysis, and scoring flows.
