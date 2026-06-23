@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { FakeAudioModelBootstrap, FakeAudioRecorder, FakeAudioDecoder, FakeAudioAnalyzer } from '../core/ports/audio/mocks';
-import { WorkerAudioModelBootstrap } from '../core/adapters/audio/WorkerAudioModelBootstrap';
-import { BrowserMediaRecorder } from '../core/adapters/audio/BrowserMediaRecorder';
-import { BrowserAudioDecoder } from '../core/adapters/audio/BrowserAudioDecoder';
-import { TransformersSpeechAdapter } from '../core/adapters/audio/TransformersSpeechAdapter';
-import { CalculateScoreUseCase } from '../core/usecases/CalculateScoreUseCase';
+import { FakeAudioModelBootstrap } from '../core/SpeechToText/ModelBootstrap.mock';
+import { FakeAudioRecorder } from '../core/Recorder/AudioRecorder.mock';
+import { FakeAudioDecoder } from '../core/AudioDecoder/AudioDecoder.mock';
+import { FakeAudioAnalyzer } from '../core/SpeechToText/SpeechAnalyzer.mock';
+import { WorkerModelBootstrap } from '../core/SpeechToText/WorkerModelBootstrap.adapter';
+import { BrowserAudioRecorder } from '../core/Recorder/BrowserAudioRecorder.adapter';
+import { BrowserAudioDecoder } from '../core/AudioDecoder/BrowserAudioDecoder.adapter';
+import { TransformersSpeechAnalyzer } from '../core/SpeechToText/TransformersSpeechAnalyzer.adapter';
+import { DefaultCalculateScoreUseCase } from '../core/OratoryAnalysis/CalculateScore.usecase';
 import { useAudioCapture } from '../hooks/useAudioCapture';
 
 export default function Home() {
@@ -23,7 +26,7 @@ export default function Home() {
   // Re-instantiate based on mode (Real or Mock)
   const bootstrap = useMemo(() => {
     if (useRealImplementation) {
-      return new WorkerAudioModelBootstrap({ quantized: true });
+      return new WorkerModelBootstrap({ quantized: true });
     }
     return new FakeAudioModelBootstrap({
       shouldFail: false,
@@ -33,7 +36,7 @@ export default function Home() {
 
   const recorder = useMemo(() => {
     if (useRealImplementation) {
-      return new BrowserMediaRecorder();
+      return new BrowserAudioRecorder();
     }
     return new FakeAudioRecorder({
       grantPermission: true,
@@ -50,7 +53,7 @@ export default function Home() {
 
   const analyzer = useMemo(() => {
     if (useRealImplementation) {
-      return new TransformersSpeechAdapter(bootstrap, decoder);
+      return new TransformersSpeechAnalyzer(bootstrap, decoder);
     }
     return new FakeAudioAnalyzer({
       delayMs: 1000,
@@ -58,7 +61,7 @@ export default function Home() {
   }, [useRealImplementation, bootstrap, decoder]);
 
   const calculateScoreUseCase = useMemo(() => {
-    return new CalculateScoreUseCase();
+    return new DefaultCalculateScoreUseCase();
   }, []);
 
   // Hook orchestration

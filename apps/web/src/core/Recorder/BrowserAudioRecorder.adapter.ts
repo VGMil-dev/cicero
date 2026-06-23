@@ -1,9 +1,9 @@
-import { IAudioRecorder } from '../../ports/audio/IAudioRecorder';
-import { PermissionsDTO } from '../../ports/audio/types';
-import { CaptureError } from '../../ports/audio/CaptureError';
+import { AudioRecorder } from './AudioRecorder.port';
+import { PermissionsDTO } from '../shared/types';
+import { CaptureError } from '../shared/CaptureError';
 
 /**
- * Adapter implementing {@link IAudioRecorder} for native audio capture
+ * Adapter implementing {@link AudioRecorder} for native audio capture
  * using the browser's MediaRecorder and MediaDevices APIs.
  * 
  * Manages the lifecycle of recording including permission checks, stream
@@ -11,7 +11,7 @@ import { CaptureError } from '../../ports/audio/CaptureError';
  * 
  * @example
  * ```typescript
- * const recorder = new BrowserMediaRecorder();
+ * const recorder = new BrowserAudioRecorder();
  * const permission = await recorder.requestPermissions();
  * if (permission.microphoneGranted) {
  *   await recorder.startRecording();
@@ -20,7 +20,7 @@ import { CaptureError } from '../../ports/audio/CaptureError';
  * }
  * ```
  */
-export class BrowserMediaRecorder implements IAudioRecorder {
+export class BrowserAudioRecorder implements AudioRecorder {
   private mediaRecorder: MediaRecorder | null = null;
   private stream: MediaStream | null = null;
   private chunks: BlobPart[] = [];

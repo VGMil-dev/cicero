@@ -1,6 +1,6 @@
-import { WorkerAudioModelBootstrap } from '../core/adapters/audio/WorkerAudioModelBootstrap';
-import { CaptureError } from '../core/ports/audio/CaptureError';
-import { ProgressDTO } from '../core/ports/audio/types';
+import { WorkerModelBootstrap } from '../core/SpeechToText/WorkerModelBootstrap.adapter';
+import { CaptureError } from '../core/shared/CaptureError';
+import { ProgressDTO } from '../core/shared/types';
 
 interface MockWorkerInstance {
   onmessage: ((event: { data: unknown }) => void) | null;
@@ -13,7 +13,7 @@ interface MockWorkerConstructor {
   instances: MockWorkerInstance[];
 }
 
-describe('WorkerAudioModelBootstrap Adapter', () => {
+describe('WorkerModelBootstrap Adapter', () => {
   let MockWorkerClass: MockWorkerConstructor;
 
   beforeEach(() => {
@@ -25,13 +25,13 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
 
   describe('Constructor & State', () => {
     it('should initialize with default model and idle state', () => {
-      const bootstrap = new WorkerAudioModelBootstrap();
+      const bootstrap = new WorkerModelBootstrap();
       expect(bootstrap.getState()).toBe('idle');
       expect(bootstrap.getWorkerInstance()).toBeNull();
     });
 
     it('should configure custom options', () => {
-      const bootstrap = new WorkerAudioModelBootstrap({
+      const bootstrap = new WorkerModelBootstrap({
         modelName: 'onnx-community/test-model',
         quantized: false,
       });
@@ -41,7 +41,7 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
 
   describe('initialize() success flow', () => {
     it('should create worker and resolve when receiving READY message', async () => {
-      const bootstrap = new WorkerAudioModelBootstrap();
+      const bootstrap = new WorkerModelBootstrap();
       
       const initPromise = bootstrap.initialize();
       expect(bootstrap.getState()).toBe('loading-model');
@@ -68,7 +68,7 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
     });
 
     it('should reuse ongoing initialize promise if called concurrently', async () => {
-      const bootstrap = new WorkerAudioModelBootstrap();
+      const bootstrap = new WorkerModelBootstrap();
       
       const initPromise1 = bootstrap.initialize();
       const initPromise2 = bootstrap.initialize();
@@ -89,7 +89,7 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
 
   describe('onProgress() monitoring', () => {
     it('should propagate progress updates from Web Worker to subscriber', async () => {
-      const bootstrap = new WorkerAudioModelBootstrap();
+      const bootstrap = new WorkerModelBootstrap();
       const progressSpy = jest.fn();
       bootstrap.onProgress(progressSpy);
 
@@ -119,7 +119,7 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
 
   describe('Error handling and panic scenarios', () => {
     it('should reject with CaptureError if Worker reports an ERROR message', async () => {
-      const bootstrap = new WorkerAudioModelBootstrap();
+      const bootstrap = new WorkerModelBootstrap();
       
       const initPromise = bootstrap.initialize();
       const workerInstance = MockWorkerClass.instances[0];
@@ -151,7 +151,7 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
     });
 
     it('should reject with WASM_PANIC and notify subscriber if Web Worker crashes (onerror)', async () => {
-      const bootstrap = new WorkerAudioModelBootstrap();
+      const bootstrap = new WorkerModelBootstrap();
       const progressSpy = jest.fn();
       bootstrap.onProgress(progressSpy);
 
@@ -191,7 +191,7 @@ describe('WorkerAudioModelBootstrap Adapter', () => {
 
   describe('terminate() lifecycle', () => {
     it('should terminate the running worker and reset state to idle', async () => {
-      const bootstrap = new WorkerAudioModelBootstrap();
+      const bootstrap = new WorkerModelBootstrap();
       
       bootstrap.initialize();
       const workerInstance = MockWorkerClass.instances[0];

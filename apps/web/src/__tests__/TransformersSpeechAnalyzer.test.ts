@@ -1,8 +1,8 @@
-import { TransformersSpeechAdapter } from '../core/adapters/audio/TransformersSpeechAdapter';
-import { IAudioModelBootstrap } from '../core/ports/audio/IAudioModelBootstrap';
-import { IAudioDecoder } from '../core/ports/audio/IAudioDecoder';
-import { CaptureError } from '../core/ports/audio/CaptureError';
-import { AudioCaptureState } from '../core/ports/audio/types';
+import { TransformersSpeechAnalyzer } from '../core/SpeechToText/TransformersSpeechAnalyzer.adapter';
+import { ModelBootstrap } from '../core/SpeechToText/ModelBootstrap.port';
+import { AudioDecoder } from '../core/AudioDecoder/AudioDecoder.port';
+import { CaptureError } from '../core/shared/CaptureError';
+import { AudioCaptureState } from '../core/shared/types';
 
 interface MockWorkerInstance {
   onmessage: ((event: { data: unknown }) => void) | null;
@@ -17,10 +17,10 @@ interface MockWorkerConstructor {
   instances: MockWorkerInstance[];
 }
 
-describe('TransformersSpeechAdapter Unit Tests', () => {
+describe('TransformersSpeechAnalyzer Unit Tests', () => {
   let MockWorkerClass: MockWorkerConstructor;
-  let mockBootstrap: jest.Mocked<IAudioModelBootstrap>;
-  let mockDecoder: jest.Mocked<IAudioDecoder>;
+  let mockBootstrap: jest.Mocked<ModelBootstrap>;
+  let mockDecoder: jest.Mocked<AudioDecoder>;
   let mockWorker: MockWorkerInstance;
 
   beforeEach(() => {
@@ -55,7 +55,7 @@ describe('TransformersSpeechAdapter Unit Tests', () => {
 
   it('should throw CaptureError if bootstrap state is not ready', async () => {
     mockBootstrap.getState.mockReturnValue('idle' as AudioCaptureState);
-    const adapter = new TransformersSpeechAdapter(mockBootstrap);
+    const adapter = new TransformersSpeechAnalyzer(mockBootstrap);
 
     const audioData = new Float32Array([1, 2, 3]);
     await expect(adapter.analyzeAudio(audioData)).rejects.toThrow(CaptureError);
@@ -70,7 +70,7 @@ describe('TransformersSpeechAdapter Unit Tests', () => {
   });
 
   it('should successfully post message to worker and resolve on ANALYSIS_SUCCESS', async () => {
-    const adapter = new TransformersSpeechAdapter(mockBootstrap);
+    const adapter = new TransformersSpeechAnalyzer(mockBootstrap);
     const audioData = new Float32Array([1, 2, 3]);
 
     const resultPromise = adapter.analyzeAudio(audioData);
@@ -104,7 +104,7 @@ describe('TransformersSpeechAdapter Unit Tests', () => {
   });
 
   it('should reject with CaptureError when worker returns ERROR message', async () => {
-    const adapter = new TransformersSpeechAdapter(mockBootstrap);
+    const adapter = new TransformersSpeechAnalyzer(mockBootstrap);
     const audioData = new Float32Array([1, 2, 3]);
 
     const resultPromise = adapter.analyzeAudio(audioData);
@@ -133,7 +133,7 @@ describe('TransformersSpeechAdapter Unit Tests', () => {
   });
 
   it('should reject with WASM_PANIC when worker crashes (onerror)', async () => {
-    const adapter = new TransformersSpeechAdapter(mockBootstrap);
+    const adapter = new TransformersSpeechAnalyzer(mockBootstrap);
     const audioData = new Float32Array([1, 2, 3]);
 
     const resultPromise = adapter.analyzeAudio(audioData);
@@ -155,8 +155,8 @@ describe('TransformersSpeechAdapter Unit Tests', () => {
     }
   });
 
-  it('should decode Blob using IAudioDecoder if Blob is passed', async () => {
-    const adapter = new TransformersSpeechAdapter(mockBootstrap, mockDecoder);
+  it('should decode Blob using AudioDecoder if Blob is passed', async () => {
+    const adapter = new TransformersSpeechAnalyzer(mockBootstrap, mockDecoder);
     const audioBlob = new Blob(['raw-audio'], { type: 'audio/wav' });
     const decodedPCM = new Float32Array([4, 5, 6]);
 
@@ -191,7 +191,7 @@ describe('TransformersSpeechAdapter Unit Tests', () => {
   });
 
   it('should throw CaptureError with DECODING_FAILED if Blob is passed but no decoder was provided', async () => {
-    const adapter = new TransformersSpeechAdapter(mockBootstrap);
+    const adapter = new TransformersSpeechAnalyzer(mockBootstrap);
     const audioBlob = new Blob(['raw-audio'], { type: 'audio/wav' });
 
     await expect(adapter.analyzeAudio(audioBlob)).rejects.toThrow(CaptureError);
@@ -200,7 +200,7 @@ describe('TransformersSpeechAdapter Unit Tests', () => {
     } catch (err: unknown) {
       const captureError = err as CaptureError;
       expect(captureError.dto.code).toBe('DECODING_FAILED');
-      expect(captureError.dto.message).toContain('Audio decoding requires an IAudioDecoder instance');
+      expect(captureError.dto.message).toContain('Audio decoding requires an AudioDecoder instance');
     }
   });
 });

@@ -1,10 +1,10 @@
-import { IAudioDecoder } from '../IAudioDecoder';
+import { AudioDecoder } from './AudioDecoder.port';
 
 /**
- * Fake implementation of {@link IAudioDecoder} for testing and UI prototyping.
+ * Fake implementation of {@link AudioDecoder} for testing and UI prototyping.
  * Simulates decoding audio blobs by returning a dummy Float32Array without Web Audio API calls.
  */
-export class FakeAudioDecoder implements IAudioDecoder {
+export class FakeAudioDecoder implements AudioDecoder {
   /**
    * Simulates decoding an audio blob.
    * 

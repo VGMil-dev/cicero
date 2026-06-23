@@ -1,6 +1,6 @@
 import { env } from '@huggingface/transformers';
-import { MainThreadMessageDTO, WorkerMessageDTO } from '../../ports/audio/types';
-import { TransformersEngine } from './TransformersEngine';
+import { MainThreadMessageDTO, WorkerMessageDTO } from '../shared/types';
+import { TransformersEngine } from './Transformers.engine';
 
 // Deshabilitar la búsqueda de modelos locales en el sistema de archivos del servidor
 env.allowLocalModels = false;

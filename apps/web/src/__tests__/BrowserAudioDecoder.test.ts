@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { BrowserAudioDecoder } from '../core/adapters/audio/BrowserAudioDecoder';
-import { CaptureError } from '../core/ports/audio/CaptureError';
+import { BrowserAudioDecoder } from '../core/AudioDecoder/BrowserAudioDecoder.adapter';
+import { CaptureError } from '../core/shared/CaptureError';
 
 describe('BrowserAudioDecoder Adapter', () => {
   let MockOfflineAudioContextClass: any;

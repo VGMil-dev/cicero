@@ -1,11 +1,11 @@
-import { CalculateScoreUseCase } from '../core/usecases/CalculateScoreUseCase';
-import { TranscriptionResultDTO } from '../core/ports/audio/types';
+import { DefaultCalculateScoreUseCase } from '../core/OratoryAnalysis/CalculateScore.usecase';
+import { TranscriptionResultDTO } from '../core/shared/types';
 
 describe('CalculateScoreUseCase', () => {
-  let useCase: CalculateScoreUseCase;
+  let useCase: DefaultCalculateScoreUseCase;
 
   beforeEach(() => {
-    useCase = new CalculateScoreUseCase();
+    useCase = new DefaultCalculateScoreUseCase();
   });
 
   it('should handle empty transcription gracefully', () => {
@@ -102,7 +102,7 @@ describe('CalculateScoreUseCase', () => {
   });
 
   it('should support custom filler words dictionary', () => {
-    const customUseCase = new CalculateScoreUseCase(new Set(['custom', 'word']));
+    const customUseCase = new DefaultCalculateScoreUseCase(new Set(['custom', 'word']));
     const input: TranscriptionResultDTO = {
       text: 'hola custom eh bueno',
       chunks: [

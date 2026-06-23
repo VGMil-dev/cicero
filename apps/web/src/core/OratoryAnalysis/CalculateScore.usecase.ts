@@ -1,5 +1,5 @@
-import { ICalculateScoreUseCase, ScoreResult } from '../ports/analysis/ICalculateScoreUseCase';
-import { TranscriptionResultDTO, AudioChunkDTO } from '../ports/audio/types';
+import { CalculateScoreUseCase, ScoreResult } from './CalculateScore.port';
+import { TranscriptionResultDTO, AudioChunkDTO } from '../shared/types';
 
 /**
  * Default dictionary of filler words (muletillas) in Spanish.
@@ -18,12 +18,12 @@ const DEFAULT_FILLER_WORDS = new Set([
 ]);
 
 /**
- * Concrete implementation of the {@link ICalculateScoreUseCase} port.
+ * Concrete implementation of the {@link CalculateScoreUseCase} port.
  * Analyzes a speech transcription to identify filler words and calculate speech metrics (WPM, score).
  *
  * @example
  * ```typescript
- * const useCase = new CalculateScoreUseCase();
+ * const useCase = new DefaultCalculateScoreUseCase();
  * const result = useCase.execute({
  *   text: "Hola, eh, bueno...",
  *   chunks: [
@@ -34,7 +34,7 @@ const DEFAULT_FILLER_WORDS = new Set([
  * });
  * ```
  */
-export class CalculateScoreUseCase implements ICalculateScoreUseCase {
+export class DefaultCalculateScoreUseCase implements CalculateScoreUseCase {
   private fillerWords: Set<string>;
 
   /**

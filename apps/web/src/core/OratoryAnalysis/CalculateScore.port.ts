@@ -1,4 +1,4 @@
-import { TranscriptionResultDTO, SessionMetricsDTO, AudioChunkDTO } from '../audio/types';
+import { TranscriptionResultDTO, SessionMetricsDTO, AudioChunkDTO } from '../shared/types';
 
 /**
  * Result of the speech evaluation containing fluency metrics and annotated chunks.
@@ -32,12 +32,12 @@ export interface ScoreResult {
  * 
  * @example
  * ```typescript
- * const useCase: ICalculateScoreUseCase = new CalculateScoreUseCase();
+ * const useCase: CalculateScoreUseCase = new DefaultCalculateScoreUseCase();
  * const score = useCase.execute(transcriptionResult);
  * console.log('Fluency Score:', score.metrics.overallScore);
  * ```
  */
-export interface ICalculateScoreUseCase {
+export interface CalculateScoreUseCase {
   /**
    * Evaluates the transcription and returns the calculated score and metrics.
    * 

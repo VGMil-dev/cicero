@@ -1,27 +1,27 @@
 import { useState, useCallback, useEffect } from 'react';
-import { IAudioModelBootstrap } from '../core/ports/audio/IAudioModelBootstrap';
-import { IAudioRecorder } from '../core/ports/audio/IAudioRecorder';
-import { IAudioDecoder } from '../core/ports/audio/IAudioDecoder';
-import { IAudioAnalyzer } from '../core/ports/audio/IAudioAnalyzer';
-import { ICalculateScoreUseCase, ScoreResult } from '../core/ports/analysis/ICalculateScoreUseCase';
-import { AudioCaptureState, ErrorDTO, ProgressDTO, ErrorCode } from '../core/ports/audio/types';
+import { ModelBootstrap } from '../core/SpeechToText/ModelBootstrap.port';
+import { AudioRecorder } from '../core/Recorder/AudioRecorder.port';
+import { AudioDecoder } from '../core/AudioDecoder/AudioDecoder.port';
+import { SpeechAnalyzer } from '../core/SpeechToText/SpeechAnalyzer.port';
+import { CalculateScoreUseCase, ScoreResult } from '../core/OratoryAnalysis/CalculateScore.port';
+import { AudioCaptureState, ErrorDTO, ProgressDTO, ErrorCode } from '../core/shared/types';
 
 /**
  * Hook to orchestrate the AI model bootstrap, audio recording, decoding, analysis, and scoring flows.
  * Handles state transitions for recording and tracks asynchronous analysis progress.
  *
- * @param bootstrap - The adapter to load and bootstrap the AI model, {@link IAudioModelBootstrap}.
- * @param recorder - The adapter to capture hardware microphone input, {@link IAudioRecorder}.
- * @param audioDecoder - The adapter to decode audio blobs to mono PCM, {@link IAudioDecoder}.
- * @param audioAnalyzer - The adapter to analyze audio PCM and transcribe it, {@link IAudioAnalyzer}.
- * @param calculateScoreUseCase - The use case to evaluate speech and compute scores, {@link ICalculateScoreUseCase}.
+ * @param bootstrap - The adapter to load and bootstrap the AI model, {@link ModelBootstrap}.
+ * @param recorder - The adapter to capture hardware microphone input, {@link AudioRecorder}.
+ * @param audioDecoder - The adapter to decode audio blobs to mono PCM, {@link AudioDecoder}.
+ * @param audioAnalyzer - The adapter to analyze audio PCM and transcribe it, {@link SpeechAnalyzer}.
+ * @param calculateScoreUseCase - The use case to evaluate speech and compute scores, {@link CalculateScoreUseCase}.
  */
 export function useAudioCapture(
-  bootstrap: IAudioModelBootstrap,
-  recorder: IAudioRecorder,
-  audioDecoder: IAudioDecoder,
-  audioAnalyzer: IAudioAnalyzer,
-  calculateScoreUseCase: ICalculateScoreUseCase
+  bootstrap: ModelBootstrap,
+  recorder: AudioRecorder,
+  audioDecoder: AudioDecoder,
+  audioAnalyzer: SpeechAnalyzer,
+  calculateScoreUseCase: CalculateScoreUseCase
 ) {
   const [state, setState] = useState<AudioCaptureState>('idle');
   const [progress, setProgress] = useState<ProgressDTO | null>(null);

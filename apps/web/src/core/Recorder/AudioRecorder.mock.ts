@@ -1,6 +1,6 @@
-import { IAudioRecorder } from '../IAudioRecorder';
-import { CaptureError } from '../CaptureError';
-import { PermissionsDTO } from '../types';
+import { AudioRecorder } from './AudioRecorder.port';
+import { CaptureError } from '../shared/CaptureError';
+import { PermissionsDTO } from '../shared/types';
 
 /**
  * Configuration options for {@link FakeAudioRecorder}.
@@ -21,7 +21,7 @@ export interface FakeAudioRecorderOptions {
 }
 
 /**
- * Fake implementation of {@link IAudioRecorder} for UI development.
+ * Fake implementation of {@link AudioRecorder} for UI development.
  *
  * Simulates hardware audio capture without accessing the browser's
  * MediaDevices API. Can be configured to test permission denied and
@@ -36,7 +36,7 @@ export interface FakeAudioRecorderOptions {
  * console.log(blob.type); // 'audio/webm'
  * ```
  */
-export class FakeAudioRecorder implements IAudioRecorder {
+export class FakeAudioRecorder implements AudioRecorder {
   private options: Required<FakeAudioRecorderOptions>;
 
   /**

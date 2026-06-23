@@ -1,4 +1,4 @@
-import { TranscriptionResultDTO } from './types';
+import { TranscriptionResultDTO } from '../shared/types';
 
 /**
  * Interface for the secondary port (Driven) responsible for audio analysis and speech-to-text.
@@ -6,12 +6,12 @@ import { TranscriptionResultDTO } from './types';
  * 
  * @example
  * ```typescript
- * const analyzer: IAudioAnalyzer = new WorkerAudioAnalyzer(bootstrap);
+ * const analyzer: SpeechAnalyzer = new WorkerAudioAnalyzer(bootstrap);
  * const result = await analyzer.analyzeAudio(audioPCM);
  * console.log('Transcribed text:', result.text);
  * ```
  */
-export interface IAudioAnalyzer {
+export interface SpeechAnalyzer {
   /**
    * Analyzes raw 16kHz mono PCM audio data and returns the transcription result.
    * 

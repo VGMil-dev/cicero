@@ -1,4 +1,4 @@
-import { ProgressDTO, AudioCaptureState } from './types';
+import { ProgressDTO, AudioCaptureState } from '../shared/types';
 
 /**
  * Interface for the AI model initialization service.
@@ -6,12 +6,12 @@ import { ProgressDTO, AudioCaptureState } from './types';
  * 
  * @example
  * ```typescript
- * const bootstrap: IAudioModelBootstrap = new TransformersBootstrap();
+ * const bootstrap: ModelBootstrap = new TransformersBootstrap();
  * bootstrap.onProgress((p) => console.log(`Loading: ${p.progress}%`));
  * await bootstrap.initialize();
  * ```
  */
-export interface IAudioModelBootstrap {
+export interface ModelBootstrap {
   /**
    * Starts the download and preparation of the AI model.
    * Resolves when the model is ready for inference.
@@ -60,4 +60,3 @@ export interface IAudioModelBootstrap {
    */
   getWorkerInstance?(): Worker | null;
 }
-

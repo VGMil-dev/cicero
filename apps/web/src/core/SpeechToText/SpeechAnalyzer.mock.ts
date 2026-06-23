@@ -1,5 +1,5 @@
-import { IAudioAnalyzer } from '../IAudioAnalyzer';
-import { TranscriptionResultDTO } from '../types';
+import { SpeechAnalyzer } from './SpeechAnalyzer.port';
+import { TranscriptionResultDTO } from '../shared/types';
 
 /**
  * Configuration options for {@link FakeAudioAnalyzer}.
@@ -39,7 +39,7 @@ const DEFAULT_RESULT: TranscriptionResultDTO = {
 };
 
 /**
- * Fake implementation of {@link IAudioAnalyzer} for testing and UI prototyping.
+ * Fake implementation of {@link SpeechAnalyzer} for testing and UI prototyping.
  *
  * Simulates the Speech-to-Text inference stage with a configurable async delay.
  * Replaces real neural network processing with mock output.
@@ -51,7 +51,7 @@ const DEFAULT_RESULT: TranscriptionResultDTO = {
  * console.log('Transcribed Text:', result.text);
  * ```
  */
-export class FakeAudioAnalyzer implements IAudioAnalyzer {
+export class FakeAudioAnalyzer implements SpeechAnalyzer {
   private options: Required<FakeAudioAnalyzerOptions>;
 
   /**

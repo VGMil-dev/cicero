@@ -1,4 +1,4 @@
-# Mocks de Captura de Audio
+# Arquitectura de Audio y Mocks
 
 ## ¿Por qué usamos Mocks?
 
@@ -9,12 +9,12 @@ mientras el equipo de IA integra el Worker real.
 
 ## Arquitectura
 
-Cada mock implementa fielmente un contrato (interfaz TypeScript) definido en
-`apps/web/src/core/ports/audio/`:
+Cada mock implementa fielmente un contrato (interfaz TypeScript/puerto) definido en
+`apps/web/src/core/`:
 
 ```
-Interfaz (Contrato)          Implementación Fake
-─────────────────────────────────────────────────
+Interfaz (Puerto)            Implementación Fake (Mock)
+───────────────────────────────────────────────────────
 IAudioModelBootstrap  ─────  FakeAudioModelBootstrap
 IAudioRecorder        ─────  FakeAudioRecorder
 ```
@@ -31,10 +31,8 @@ reemplazan por adaptadores reales.
 ## Cómo usar
 
 ```typescript
-import {
-  FakeAudioModelBootstrap,
-  FakeAudioRecorder,
-} from '@/core/ports/audio/mocks';
+import { FakeAudioModelBootstrap } from '@/core/SpeechToText/FakeAudioModelBootstrap.mock';
+import { FakeAudioRecorder } from '@/core/Recorder/FakeAudioRecorder.mock';
 
 // ── Modelo (carga simulada) ──
 const model = new FakeAudioModelBootstrap();
@@ -57,7 +55,8 @@ if (perms.microphoneGranted) {
 
 ### Error de carga del modelo
 ```typescript
-import { CaptureError, FakeAudioModelBootstrap } from '@/core/ports/audio/mocks';
+import { CaptureError } from '@/core/shared/CaptureError';
+import { FakeAudioModelBootstrap } from '@/core/SpeechToText/FakeAudioModelBootstrap.mock';
 
 const model = new FakeAudioModelBootstrap({ shouldFail: true });
 try {
@@ -71,7 +70,7 @@ try {
 
 ### Permiso denegado
 ```typescript
-import { FakeAudioRecorder } from '@/core/ports/audio/mocks';
+import { FakeAudioRecorder } from '@/core/Recorder/FakeAudioRecorder.mock';
 
 const recorder = new FakeAudioRecorder({ grantPermission: false });
 const perms = await recorder.requestPermissions();
@@ -80,7 +79,8 @@ console.log(perms.microphoneGranted); // false
 
 ### Error al iniciar grabación
 ```typescript
-import { CaptureError, FakeAudioRecorder } from '@/core/ports/audio/mocks';
+import { CaptureError } from '@/core/shared/CaptureError';
+import { FakeAudioRecorder } from '@/core/Recorder/FakeAudioRecorder.mock';
 
 const recorder = new FakeAudioRecorder({
   grantPermission: true,

@@ -1,6 +1,6 @@
-import { IAudioModelBootstrap } from '../IAudioModelBootstrap';
-import { AudioCaptureState, ProgressDTO, ProgressStatus } from '../types';
-import { CaptureError } from '../CaptureError';
+import { ModelBootstrap } from './ModelBootstrap.port';
+import { AudioCaptureState, ProgressDTO, ProgressStatus } from '../shared/types';
+import { CaptureError } from '../shared/CaptureError';
 
 /**
  * Configuration options for {@link FakeAudioModelBootstrap}.
@@ -35,7 +35,7 @@ const DEFAULT_STAGES: ProgressStage[] = [
 ];
 
 /**
- * Fake implementation of {@link IAudioModelBootstrap} for UI development.
+ * Fake implementation of {@link ModelBootstrap} for UI development.
  *
  * Simulates the model download/initialization process by emitting
  * progressive {@link ProgressDTO} events at regular intervals.
@@ -59,7 +59,7 @@ const DEFAULT_STAGES: ProgressStage[] = [
  * }
  * ```
  */
-export class FakeAudioModelBootstrap implements IAudioModelBootstrap {
+export class FakeAudioModelBootstrap implements ModelBootstrap {
   private state: AudioCaptureState = 'idle';
   private progressCallbacks = new Set<(progress: ProgressDTO) => void>();
   private timer: ReturnType<typeof setInterval> | null = null;

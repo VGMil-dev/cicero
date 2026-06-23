@@ -1,10 +1,10 @@
-import { PermissionsDTO } from './types';
+import { PermissionsDTO } from '../shared/types';
 
 /**
  * Interface for the hardware audio capture service.
  * Abstracts the interaction with the browser's MediaDevices API.
  */
-export interface IAudioRecorder {
+export interface AudioRecorder {
   /**
    * Requests necessary hardware permissions (Microphone) from the user.
    * 

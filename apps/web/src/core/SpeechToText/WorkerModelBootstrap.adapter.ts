@@ -1,6 +1,6 @@
-import { IAudioModelBootstrap } from '../../ports/audio/IAudioModelBootstrap';
-import { AudioCaptureState, ProgressDTO, WorkerMessageDTO, MainThreadMessageDTO } from '../../ports/audio/types';
-import { CaptureError } from '../../ports/audio/CaptureError';
+import { ModelBootstrap } from './ModelBootstrap.port';
+import { AudioCaptureState, ProgressDTO, WorkerMessageDTO, MainThreadMessageDTO } from '../shared/types';
+import { CaptureError } from '../shared/CaptureError';
 
 /**
  * Opciones para configurar la inicialización del modelo de audio.
@@ -13,7 +13,7 @@ export interface WorkerAudioModelBootstrapOptions {
 }
 
 /**
- * Adaptador que implementa {@link IAudioModelBootstrap} para la inicialización
+ * Adaptador que implementa {@link ModelBootstrap} para la inicialización
  * y descarga del modelo de voz local en un Web Worker en segundo plano.
  * 
  * Gestiona el ciclo de vida del Web Worker, intercepta y procesa los mensajes del hilo
@@ -21,12 +21,12 @@ export interface WorkerAudioModelBootstrapOptions {
  * 
  * @example
  * ```typescript
- * const bootstrap = new WorkerAudioModelBootstrap({ quantized: true });
+ * const bootstrap = new WorkerModelBootstrap({ quantized: true });
  * bootstrap.onProgress((p) => console.log(`Cargado: ${p.progress}% - ${p.message}`));
  * await bootstrap.initialize();
  * ```
  */
-export class WorkerAudioModelBootstrap implements IAudioModelBootstrap {
+export class WorkerModelBootstrap implements ModelBootstrap {
   private worker: Worker | null = null;
   private state: AudioCaptureState = 'idle';
   private progressCallback: ((progress: ProgressDTO) => void) | null = null;
@@ -83,7 +83,7 @@ export class WorkerAudioModelBootstrap implements IAudioModelBootstrap {
       try {
         // Sintaxis nativa de Web Worker en Next.js
         this.worker = new Worker(
-          new URL('./audio.worker.ts', import.meta.url),
+          new URL('./Transformers.worker.ts', import.meta.url),
           { type: 'module' }
         );
 

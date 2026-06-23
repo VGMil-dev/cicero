@@ -1,37 +1,37 @@
-import { IAudioAnalyzer } from '../../ports/audio/IAudioAnalyzer';
-import { IAudioModelBootstrap } from '../../ports/audio/IAudioModelBootstrap';
-import { IAudioDecoder } from '../../ports/audio/IAudioDecoder';
-import { CaptureError } from '../../ports/audio/CaptureError';
-import { TranscriptionResultDTO, WorkerMessageDTO } from '../../ports/audio/types';
+import { SpeechAnalyzer } from './SpeechAnalyzer.port';
+import { ModelBootstrap } from './ModelBootstrap.port';
+import { AudioDecoder } from '../AudioDecoder/AudioDecoder.port';
+import { CaptureError } from '../shared/CaptureError';
+import { TranscriptionResultDTO, WorkerMessageDTO } from '../shared/types';
 
 /**
  * Secondary adapter (Driven) that orchestrates audio speech-to-text analysis.
  * Uses a background Web Worker running Transformers.js to perform inference.
- * Optionally integrates with an {@link IAudioDecoder} to process Blob inputs.
+ * Optionally integrates with an {@link AudioDecoder} to process Blob inputs.
  * 
  * @example
  * ```typescript
- * const bootstrap = new WorkerAudioModelBootstrap();
+ * const bootstrap = new WorkerModelBootstrap();
  * await bootstrap.initialize();
- * const decoder = new WebAudioDecoder();
- * const adapter = new TransformersSpeechAdapter(bootstrap, decoder);
+ * const decoder = new BrowserAudioDecoder();
+ * const adapter = new TransformersSpeechAnalyzer(bootstrap, decoder);
  * 
  * // Transcribe Float32Array PCM data
  * const result = await adapter.analyzeAudio(audioPCM);
  * console.log('Transcription text:', result.text);
  * ```
  */
-export class TransformersSpeechAdapter implements IAudioAnalyzer {
-  private readonly bootstrap: IAudioModelBootstrap;
-  private readonly decoder?: IAudioDecoder;
+export class TransformersSpeechAnalyzer implements SpeechAnalyzer {
+  private readonly bootstrap: ModelBootstrap;
+  private readonly decoder?: AudioDecoder;
 
   /**
-   * Creates an instance of TransformersSpeechAdapter.
+   * Creates an instance of TransformersSpeechAnalyzer.
    * 
    * @param bootstrap - The service responsible for preparing the Web Worker environment.
    * @param decoder - Optional audio decoder to decode Blobs before inference.
    */
-  constructor(bootstrap: IAudioModelBootstrap, decoder?: IAudioDecoder) {
+  constructor(bootstrap: ModelBootstrap, decoder?: AudioDecoder) {
     if (!bootstrap) {
       throw new Error('Audio model bootstrap instance is required.');
     }
@@ -63,7 +63,7 @@ export class TransformersSpeechAdapter implements IAudioAnalyzer {
       if (!this.decoder) {
         throw new CaptureError(
           'DECODING_FAILED',
-          'Audio decoding requires an IAudioDecoder instance, but none was provided.'
+          'Audio decoding requires an AudioDecoder instance, but none was provided.'
         );
       }
       pcm = await this.decoder.decodeTo16kHzMono(audioData);

@@ -1,7 +1,7 @@
-import { BrowserMediaRecorder } from '../core/adapters/audio/BrowserMediaRecorder';
-import { CaptureError } from '../core/ports/audio/CaptureError';
+import { BrowserAudioRecorder } from '../core/Recorder/BrowserAudioRecorder.adapter';
+import { CaptureError } from '../core/shared/CaptureError';
 
-describe('BrowserMediaRecorder Adapter', () => {
+describe('BrowserAudioRecorder Adapter', () => {
   let originalNavigator: typeof navigator;
   let originalMediaRecorder: typeof MediaRecorder;
 
@@ -81,7 +81,7 @@ describe('BrowserMediaRecorder Adapter', () => {
         return type === 'audio/webm';
       });
 
-      new BrowserMediaRecorder();
+      new BrowserAudioRecorder();
       expect(MockMediaRecorder.isTypeSupported).toHaveBeenCalledWith('audio/webm;codecs=opus');
       expect(MockMediaRecorder.isTypeSupported).toHaveBeenCalledWith('audio/webm');
     });
@@ -89,7 +89,7 @@ describe('BrowserMediaRecorder Adapter', () => {
 
   describe('requestPermissions()', () => {
     it('should return microphoneGranted: true and stop tracks if permission is granted', async () => {
-      const recorder = new BrowserMediaRecorder();
+      const recorder = new BrowserAudioRecorder();
       const perms = await recorder.requestPermissions();
 
       expect(mockGetUserMedia).toHaveBeenCalledWith({ audio: true });
@@ -99,7 +99,7 @@ describe('BrowserMediaRecorder Adapter', () => {
 
     it('should return microphoneGranted: false if getUserMedia rejects', async () => {
       mockGetUserMedia.mockRejectedValue(new Error('Permission denied'));
-      const recorder = new BrowserMediaRecorder();
+      const recorder = new BrowserAudioRecorder();
       const perms = await recorder.requestPermissions();
 
       expect(perms.microphoneGranted).toBe(false);
@@ -114,7 +114,7 @@ describe('BrowserMediaRecorder Adapter', () => {
         value: undefined,
       });
 
-      const recorder = new BrowserMediaRecorder();
+      const recorder = new BrowserAudioRecorder();
       const perms = await recorder.requestPermissions();
 
       expect(perms.microphoneGranted).toBe(false);
@@ -130,7 +130,7 @@ describe('BrowserMediaRecorder Adapter', () => {
 
   describe('startRecording()', () => {
     it('should successfully request stream and start recording', async () => {
-      const recorder = new BrowserMediaRecorder();
+      const recorder = new BrowserAudioRecorder();
       await expect(recorder.startRecording()).resolves.toBeUndefined();
 
       expect(mockGetUserMedia).toHaveBeenCalledWith({ audio: true });
@@ -140,7 +140,7 @@ describe('BrowserMediaRecorder Adapter', () => {
       const accessError = new Error('Hardware error');
       mockGetUserMedia.mockRejectedValue(accessError);
 
-      const recorder = new BrowserMediaRecorder();
+      const recorder = new BrowserAudioRecorder();
       await expect(recorder.startRecording()).rejects.toThrow(CaptureError);
       
       try {
@@ -154,7 +154,7 @@ describe('BrowserMediaRecorder Adapter', () => {
     });
 
     it('should throw RECORDING_FAILED if startRecording is called while already recording', async () => {
-      const recorder = new BrowserMediaRecorder();
+      const recorder = new BrowserAudioRecorder();
       await recorder.startRecording();
 
       await expect(recorder.startRecording()).rejects.toThrow(CaptureError);
@@ -170,7 +170,7 @@ describe('BrowserMediaRecorder Adapter', () => {
 
   describe('stopRecording()', () => {
     it('should stop the recorder, release the stream, and resolve with the audio Blob', async () => {
-      const recorder = new BrowserMediaRecorder();
+      const recorder = new BrowserAudioRecorder();
       await recorder.startRecording();
 
       const stopPromise = recorder.stopRecording();
@@ -181,7 +181,7 @@ describe('BrowserMediaRecorder Adapter', () => {
     });
 
     it('should throw RECORDING_FAILED if stopRecording is called when inactive', async () => {
-      const recorder = new BrowserMediaRecorder();
+      const recorder = new BrowserAudioRecorder();
       await expect(recorder.stopRecording()).rejects.toThrow(CaptureError);
 
       try {
@@ -196,7 +196,7 @@ describe('BrowserMediaRecorder Adapter', () => {
 
   describe('cancelRecording()', () => {
     it('should stop recorder, release tracks, and clean up state without resolving a blob', async () => {
-      const recorder = new BrowserMediaRecorder();
+      const recorder = new BrowserAudioRecorder();
       await recorder.startRecording();
       
       recorder.cancelRecording();

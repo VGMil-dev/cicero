@@ -1,8 +1,8 @@
-import { IAudioDecoder } from '../../ports/audio/IAudioDecoder';
-import { CaptureError } from '../../ports/audio/CaptureError';
+import { AudioDecoder } from './AudioDecoder.port';
+import { CaptureError } from '../shared/CaptureError';
 
 /**
- * Adapter implementing {@link IAudioDecoder} for browser-based audio decoding and resampling.
+ * Adapter implementing {@link AudioDecoder} for browser-based audio decoding and resampling.
  * 
  * Uses the Web Audio API's {@link OfflineAudioContext} to resample and downmix any source audio Blob
  * to a standard mono Float32Array sampled at 16kHz.
@@ -13,7 +13,7 @@ import { CaptureError } from '../../ports/audio/CaptureError';
  * const pcmData = await decoder.decodeTo16kHzMono(audioBlob);
  * ```
  */
-export class BrowserAudioDecoder implements IAudioDecoder {
+export class BrowserAudioDecoder implements AudioDecoder {
   private readonly OfflineAudioContextClass: typeof OfflineAudioContext | null;
 
   /**

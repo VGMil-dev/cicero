@@ -5,11 +5,11 @@
  * 
  * @example
  * ```typescript
- * const decoder: IAudioDecoder = new WebAudioDecoder();
+ * const decoder: AudioDecoder = new WebAudioDecoder();
  * const audioPCM = await decoder.decodeTo16kHzMono(audioBlob);
  * ```
  */
-export interface IAudioDecoder {
+export interface AudioDecoder {
   /**
    * Decodes an audio blob to a single-channel (mono) Float32Array sampled at 16kHz.
    * 
