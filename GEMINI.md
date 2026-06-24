@@ -14,6 +14,7 @@ Estas reglas dictan el estándar de trabajo, arquitectura y gobernanza para el d
 - **Plantilla de PR**: Todo Pull Request debe crearse utilizando la plantilla del proyecto (`.github/pull_request_template.md`), completando detalladamente la descripción y la checklist de verificación.
 - **Gestión con `gh-cli`**: Para interactuar con GitHub (crear issues, abrir PRs, o hacer merge), se deben usar las herramientas oficiales de GitHub CLI (ej. `gh pr create --template ...` y `gh pr merge <id> --squash`).
 - **Micro-commits y Squash**: El trabajo se divide en fases lógicas (Preparación, Implementación, Documentación). Cada fase requiere su propio commit con Conventional Commits. Al fusionar el PR, se debe utilizar **Squash** para comprimir los micro-commits iterativos en un único commit atómico en `development`.
+- **Requisito de Pruebas y Calidad**: Ningún Pull Request puede ser aprobado o fusionado si no pasa exitosamente todas las pruebas automatizadas (`pnpm test`) y la verificación estática (`pnpm lint`).
 
 ## 3. Arquitectura (Hexagonal + Slices + React DI + Atomic Design)
 Este proyecto utiliza una arquitectura desacoplada y orientada a dominios:
