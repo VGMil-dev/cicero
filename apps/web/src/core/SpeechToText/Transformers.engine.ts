@@ -44,7 +44,7 @@ export class TransformersEngine {
     modelName: string,
     options: {
       device: 'webgpu' | 'wasm';
-      dtype: 'q4' | 'q8' | 'fp32';
+      dtype: 'q4';
       progress_callback?: (data: TransformersProgressData) => void;
     }
   ): Promise<void> {
@@ -121,7 +121,7 @@ export class TransformersEngine {
           // Si el segmento no tiene timestamps válidos, aproximamos sobre la duración total
           const start = (segment.timestamp && typeof segment.timestamp[0] === 'number') ? segment.timestamp[0] : 0;
           const end = (segment.timestamp && typeof segment.timestamp[1] === 'number') ? segment.timestamp[1] : start + 2;
-          
+
           const duration = end - start;
           const wordDuration = duration / words.length;
 
