@@ -70,6 +70,7 @@ export class FakeAudioAnalyzer implements SpeechAnalyzer {
    * @param _audioPCM - Ignored in the mock implementation.
    * @returns A promise resolving to the configured {@link TranscriptionResultDTO}.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async analyzeAudio(_audioPCM: Float32Array): Promise<TranscriptionResultDTO> {
     return new Promise((resolve) => {
       setTimeout(() => {

@@ -20,20 +20,20 @@ describe('TransformersEngine Unit Tests', () => {
     
     await engine.initialize('test-model', {
       device: 'webgpu',
-      dtype: 'q8',
+      dtype: 'q4',
       progress_callback: progressCallback,
     });
 
     expect(pipeline).toHaveBeenCalledWith('automatic-speech-recognition', 'test-model', {
       device: 'webgpu',
-      dtype: 'q8',
+      dtype: 'q4',
       progress_callback: progressCallback,
     });
   });
 
   it('should execute infer and return correct TranscriptionResultDTO', async () => {
     const engine = new TransformersEngine();
-    await engine.initialize('test-model', { device: 'wasm', dtype: 'fp32' });
+    await engine.initialize('test-model', { device: 'wasm', dtype: 'q4' });
 
     // Mock pipeline output
     const mockOutput = {
@@ -67,7 +67,7 @@ describe('TransformersEngine Unit Tests', () => {
 
   it('should handle missing chunks or invalid formats in infer gracefully', async () => {
     const engine = new TransformersEngine();
-    await engine.initialize('test-model', { device: 'wasm', dtype: 'fp32' });
+    await engine.initialize('test-model', { device: 'wasm', dtype: 'q4' });
 
     mockPipeline.mockResolvedValue({ text: 'just text' }); // no chunks
 
@@ -87,7 +87,7 @@ describe('TransformersEngine Unit Tests', () => {
 
   it('should propagate errors from pipeline execution', async () => {
     const engine = new TransformersEngine();
-    await engine.initialize('test-model', { device: 'wasm', dtype: 'fp32' });
+    await engine.initialize('test-model', { device: 'wasm', dtype: 'q4' });
     
     mockPipeline.mockRejectedValue(new Error('CUDA out of memory'));
 

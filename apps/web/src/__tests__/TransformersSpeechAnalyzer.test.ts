@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TransformersSpeechAnalyzer } from '../core/SpeechToText/TransformersSpeechAnalyzer.adapter';
 import { ModelBootstrap } from '../core/SpeechToText/ModelBootstrap.port';
 import { AudioDecoder } from '../core/AudioDecoder/AudioDecoder.port';

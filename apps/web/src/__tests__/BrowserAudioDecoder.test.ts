@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { BrowserAudioDecoder } from '../core/AudioDecoder/BrowserAudioDecoder.adapter';
 import { AudioDecoderError } from '../core/AudioDecoder/AudioDecoderError';
 
