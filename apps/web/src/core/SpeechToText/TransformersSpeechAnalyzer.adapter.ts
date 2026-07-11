@@ -1,7 +1,7 @@
 import { SpeechAnalyzer } from './SpeechAnalyzer.port';
 import { ModelBootstrap } from './ModelBootstrap.port';
 import { AudioDecoder } from '../AudioDecoder/AudioDecoder.port';
-import { SpeechToTextError } from './SpeechToTextError';
+import { SpeechToTextError, SpeechToTextErrorCode } from './SpeechToTextError';
 import { AudioDecoderError } from '../AudioDecoder/AudioDecoderError';
 import { TranscriptionResultDTO, WorkerMessageDTO } from './types';
 
@@ -85,7 +85,7 @@ export class TransformersSpeechAnalyzer implements SpeechAnalyzer {
           cleanup();
           reject(
             new SpeechToTextError(
-              msg.payload.code as any,
+              msg.payload.code as SpeechToTextErrorCode,
               { message: msg.payload.message, details: msg.payload.details }
             )
           );

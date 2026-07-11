@@ -10,13 +10,7 @@ export interface TransformersProgressData {
   file?: string;
 }
 
-/**
- * Shape of individual token/word chunks returned by Transformers.js ASR pipeline.
- */
-interface WhisperPipelineChunk {
-  text: string;
-  timestamp: [number, number];
-}
+
 
 /**
  * Speech-to-text inference engine using Hugging Face's Transformers.js library.

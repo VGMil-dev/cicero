@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { WorkerModelBootstrap } from '../core/SpeechToText/WorkerModelBootstrap.adapter';
 import { SpeechToTextError } from '../core/SpeechToText/SpeechToTextError';
 import { ProgressDTO } from '../core/SpeechToText/types';

@@ -1,7 +1,7 @@
 import { ModelBootstrap } from './ModelBootstrap.port';
 import { AudioCaptureState } from '../shared/types';
 import { ProgressDTO, WorkerMessageDTO, MainThreadMessageDTO } from './types';
-import { SpeechToTextError } from './SpeechToTextError';
+import { SpeechToTextError, SpeechToTextErrorCode } from './SpeechToTextError';
 
 /**
  * Opciones para configurar la inicialización del modelo de audio.
@@ -183,7 +183,7 @@ export class WorkerModelBootstrap implements ModelBootstrap {
         this.state = 'error';
         const errorPayload = message.payload;
         const captureError = new SpeechToTextError(
-          errorPayload.code as any,
+          errorPayload.code as SpeechToTextErrorCode,
           { message: errorPayload.message, details: errorPayload.details }
         );
         if (errorPayload.stack) {

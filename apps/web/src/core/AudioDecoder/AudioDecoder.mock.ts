@@ -11,6 +11,7 @@ export class FakeAudioDecoder implements AudioDecoder {
    * @param _audioBlob - Ignored in the mock.
    * @returns A promise resolving to an empty Float32Array.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async decodeTo16kHzMono(_audioBlob: Blob): Promise<Float32Array> {
     return Promise.resolve(new Float32Array(16000));
   }

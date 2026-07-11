@@ -176,7 +176,7 @@ self.addEventListener('message', async (event: MessageEvent<MainThreadMessageDTO
     case 'LOAD_MODEL': {
       const modelName = message.payload?.modelName || 'onnx-community/CrisperWhisper-ONNX';
       // Forzar q4 por defecto para evitar OOM
-      const dtype: 'q4' = 'q4';
+      const dtype = 'q4' as const;
 
       // Comprobación de Singleton
       if (engineInstance && currentModelName === modelName && currentDtype === dtype) {
