@@ -39,6 +39,7 @@ const sidebars: SidebarsConfig = {
       label: 'Diseño',
       items: [
         'diseno/sistema-de-diseno',
+        'diseno/historias-usuario-gherkin',
       ],
     },
   ],
